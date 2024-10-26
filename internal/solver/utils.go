@@ -54,7 +54,7 @@ func getNeighboursNotFinish(x, y int) (res []Position) {
 }
 
 func validPosition(x, y int) bool {
-	return 0 <= x && x < Height && 0 <= y && y <= Width
+	return 0 <= x && x < Height && 0 <= y && y < Width
 }
 
 func checkPositionNotFinish(x, y int) bool {
