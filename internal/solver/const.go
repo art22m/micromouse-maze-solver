@@ -1,17 +1,17 @@
 package solver
 
 const (
-	Width  = 16
-	Height = 16
+	Width  = 6
+	Height = 6
 
 	StartX = 0
 	StartY = 0
 
-	FinishXFrom = 7
-	FinishXTo   = 8
+	FinishXFrom = 2
+	FinishXTo   = 3
 
-	FinishYFrom = 7
-	FinishYTo   = 8
+	FinishYFrom = 2
+	FinishYTo   = 3
 )
 
 type Position struct {

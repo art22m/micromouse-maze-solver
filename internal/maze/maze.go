@@ -34,3 +34,7 @@ const (
 
 	Unknown = 42
 )
+
+func (w Wall) Contains(wc Wall) bool {
+	return w&wc == wc
+}
