@@ -5,31 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 
 	"jackson/internal/maze"
 )
-
-type Cell struct {
-	Wall maze.Wall
-}
-
-type CellResp struct {
-	Laser struct {
-		Back    int `json:"1"`
-		Left    int `json:"2"`
-		Right45 int `json:"3"`
-		Front   int `json:"4"`
-		Right   int `json:"5"`
-		Left45  int `json:"6"`
-	} `json:"laser"`
-	Imu struct {
-		Roll  int `json:"roll"`
-		Pitch int `json:"pitch"`
-		Yaw   int `json:"yaw"`
-	} `json:"imu"`
-}
 
 type Mover interface {
 	Forward(int)
@@ -37,41 +16,71 @@ type Mover interface {
 
 	Left()
 	Right()
+	Rotate()
 
 	CellState() Cell
 }
 
-type VagifMover struct {
-	angle   int // from 0 to 360 degrees
-	front   int
-	back    int
-	left    int
-	right   int
-	robotIP string
-	ID      string
+type Cell struct {
+	Wall maze.Wall
 }
 
-func NewVagifMover(robotIP, ID string) *VagifMover {
-	return &VagifMover{
-		angle:   0,
-		robotIP: robotIP,
-		ID:      ID,
+type CellResp struct {
+	Laser struct {
+		Back    float64 `json:"1"`
+		Left    float64 `json:"2"`
+		Right45 float64 `json:"3"`
+		Front   float64 `json:"4"`
+		Right   float64 `json:"5"`
+		Left45  float64 `json:"6"`
+	} `json:"laser"`
+	Imu struct {
+		Roll  float64 `json:"roll"`
+		Pitch float64 `json:"pitch"`
+		Yaw   float64 `json:"yaw"`
+	} `json:"imu"`
+}
+
+const wallThreshold float64 = 100
+
+func (c CellResp) ToCell() Cell {
+	var w maze.Wall
+	if c.Laser.Back < wallThreshold {
+		w.Add(maze.D)
+	}
+	if c.Laser.Front < wallThreshold {
+		w.Add(maze.U)
+	}
+	if c.Laser.Left < wallThreshold {
+		w.Add(maze.L)
+	}
+	if c.Laser.Right < wallThreshold {
+		w.Add(maze.R)
+	}
+	return Cell{
+		Wall: w,
 	}
 }
 
-func (m VagifMover) move(direction string, value int) (*http.Response, error) {
+type baseMover struct {
+	motorsIP  string
+	sensorsIP string
+	id        string
+}
+
+func (m baseMover) move(direction string, value int) (*http.Response, error) {
 	/* move PUT:
 	http://[robot_ip]/move
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
-	reqUrl := fmt.Sprintf("http://%s/%s", m.robotIP, "move")
+	reqUrl := fmt.Sprintf("http://%s/%s", m.motorsIP, "move")
 
 	reqBody, _ := json.Marshal(struct {
 		Id        string `json:"id"`
 		Direction string `json:"direction"`
 		Len       int    `json:"len"`
 	}{
-		Id:        m.ID,
+		Id:        m.id,
 		Direction: direction,
 		Len:       value,
 	})
@@ -84,15 +93,15 @@ func (m VagifMover) move(direction string, value int) (*http.Response, error) {
 	return resp, err
 }
 
-func (m VagifMover) getSensor() (*CellResp, error) {
+func (m baseMover) getSensor() (*CellResp, error) {
 	/* sensors POST:
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
 	*/
-	reqUrl := fmt.Sprintf("http://%s/%s", m.robotIP, "sensor")
+	reqUrl := fmt.Sprintf("http://%s/%s", m.sensorsIP, "sensor")
 
 	reqBody, _ := json.Marshal(map[string]string{
-		"id":   m.ID,
+		"id":   m.id,
 		"type": "all",
 	})
 
@@ -115,103 +124,4 @@ func (m VagifMover) getSensor() (*CellResp, error) {
 		return nil, err
 	}
 	return &cellResp, err
-}
-
-const (
-	Front     = 0
-	Right     = 90
-	Down      = 180
-	Left      = 270
-	Tolerance = 5 // допустимая погрешность
-)
-
-func (m VagifMover) closestDirectionAndAngle() (string, int) {
-	directions := map[string]int{
-		"Front": Front,
-		"Right": Right,
-		"Down":  Down,
-		"Left":  Left,
-	}
-
-	minDiff := 360.0
-	closest := ""
-	var angleDiff int
-
-	for dir, angle := range directions {
-		diff := angle - m.angle
-		if diff > 180 {
-			diff -= 360
-		} else if diff < -180 {
-			diff += 360
-		}
-
-		if math.Abs(float64(diff)) < minDiff {
-			minDiff = math.Abs(float64(diff))
-			closest = dir
-			angleDiff = diff
-		}
-	}
-
-	return closest, angleDiff
-}
-
-func (m VagifMover) isNotAimedAtCenter() bool {
-	_, angleDiff := m.closestDirectionAndAngle()
-	return math.Abs(float64(angleDiff)) > Tolerance
-}
-
-// Метод для центрирования робота к ближайшей оси
-func (m VagifMover) centering() {
-	_, angleDiff := m.closestDirectionAndAngle()
-
-	if angleDiff > 0 {
-		m.RotateRight(int(angleDiff))
-	} else if angleDiff < 0 {
-		m.RotateRight(int(-angleDiff))
-	} else {
-		fmt.Println("Робот уже отцентрован.")
-	}
-}
-
-func (m VagifMover) Forward(cell int) {
-	if m.isNotAimedAtCenter() {
-		m.centering()
-	}
-	m.move("forward", cell*180)
-	// transform cell parameter to mm
-	// send command to mouse
-	// check position and angle
-	// save angle
-}
-
-func (m VagifMover) Backward(cell int) {
-	// same as forward
-	m.move("backward", cell*180)
-}
-
-func (m VagifMover) RotateLeft(degrees int) {
-	_, err := m.move("left", degrees)
-	if err != nil {
-		return
-	}
-}
-
-func (m VagifMover) Left() {
-	// get current angle from memory
-	m.RotateLeft(90)
-}
-
-func (m VagifMover) RotateRight(degrees int) {
-	_, err := m.move("right", degrees)
-	if err != nil {
-		return
-	}
-}
-func (m VagifMover) Right() {
-	m.RotateRight(90)
-}
-
-func (m VagifMover) CellState() Cell {
-	resp, err := m.getSensor()
-	return Cell{}
 }

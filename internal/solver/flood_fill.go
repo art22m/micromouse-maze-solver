@@ -20,7 +20,7 @@ type FloodFill struct {
 	pos Position
 }
 
-func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) FloodFill {
+func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
 	flood := make([][]int, Height)
 	cells := make([][]ma.Wall, Height)
 	for i := 0; i < Height; i++ {
@@ -35,7 +35,7 @@ func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) FloodFill {
 		}
 	}
 
-	return FloodFill{
+	return &FloodFill{
 		flood: flood,
 		cells: cells,
 		mo:    mover,
@@ -72,8 +72,7 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 0:
 		return
 	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 2:
-		f.mo.Right()
-		f.mo.Right()
+		f.mo.Rotate()
 	default:
 		if int(nextPos.Direction-f.dir) > 0 {
 			f.mo.Right()

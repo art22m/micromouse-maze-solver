@@ -49,6 +49,12 @@ func (w Wall) Contains(wc Wall) bool {
 	return w&wc == wc
 }
 
+// Add adds wall
+// NOTE: wc should be only L R U D
+func (w Wall) Add(wc Wall) {
+	w &= wc
+}
+
 func abs(v int) int {
 	if v > 0 {
 		return v
