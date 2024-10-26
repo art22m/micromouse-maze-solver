@@ -31,7 +31,7 @@ func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
 	for i := 0; i < Height; i++ {
 		for j := 0; j < Width; j++ {
 			flood[i][j] = abs(i-getNearest(i, FinishXFrom, FinishXTo)) + abs(j-getNearest(j, FinishYFrom, FinishYTo))
-			cells[i][j] = ma.Unknown
+			cells[i][j] = 0
 		}
 	}
 
