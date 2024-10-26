@@ -19,7 +19,7 @@ public class MouseController : MonoBehaviour
     private Action onFinish = null;
     private float moveCycles = 0;
     private float maxMoveCycles = 0;
-    private Vector3 positionTarget;
+    private Vector2 positionTarget;
     private float rotationTarget;
 
     public void InitMouse(float cellSize, int x, int y) {
@@ -44,7 +44,7 @@ public class MouseController : MonoBehaviour
         return rotate(angle, onFinish);
     }
 
-    private bool move(Vector3 diff, Action onFinish) {
+    private bool move(Vector2 diff, Action onFinish) {
         if (state != State.Idle) {
             return false;
         }
@@ -53,7 +53,7 @@ public class MouseController : MonoBehaviour
 
         moveCycles = 0;
         maxMoveCycles = distance / mouseSpeed + 1;
-        positionTarget = mouse.transform.position + diff;
+        positionTarget = rb.position + diff;
         state = State.Moving;
 
         this.onFinish = onFinish;
@@ -80,13 +80,21 @@ public class MouseController : MonoBehaviour
         }
 
         if (state == State.Moving) {
-            Vector3 diff = positionTarget - mouse.transform.position;
+            Vector2 diff = positionTarget - rb.position;
             if (diff.magnitude < mouseSpeed) {
-                rb.MovePosition(positionTarget);
+                if (diff.magnitude < 100) {
+                    rb.MovePosition(positionTarget);
+                } else {
+                    rb.position = positionTarget;
+                }
                 onFinish();
                 state = State.Idle;
             } else {
-                rb.MovePosition(mouse.transform.position + diff.normalized * mouseSpeed);
+                if (diff.magnitude < 100) {
+                    rb.MovePosition(rb.position + diff.normalized * mouseSpeed);
+                } else {
+                    rb.position += diff.normalized * mouseSpeed;
+                }
                 moveCycles++;
                 if (moveCycles >= maxMoveCycles) {
                     onFinish();

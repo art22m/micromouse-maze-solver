@@ -25,7 +25,7 @@ public class Runner : MonoBehaviour
         Serve();
     }
 
-    void Update() {
+    void LateUpdate() {
         if (Input.GetKeyUp(KeyCode.UpArrow)) {
             bool status = mouseController.MoveForward(poleSize + wallLength, () => {});
         }
