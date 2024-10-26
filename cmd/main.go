@@ -2,10 +2,26 @@ package main
 
 import (
 	"jackson/internal/maze"
+	mo "jackson/internal/mover"
 	"jackson/internal/solver"
 )
 
+const (
+	sensorsIP = ""
+	motorsIP  = ""
+	robotID   = ""
+)
+
 func main() {
-	ff := solver.NewFloodFill(maze.Up, solver.NewPosition(0, 0), nil)
+	mover := mo.NewDummyMover(sensorsIP, motorsIP, robotID)
+	startPosition := solver.NewPosition(0, 0)
+	baseDirection := maze.Up
+
+	ff := solver.NewFloodFill(
+		baseDirection,
+		startPosition,
+		mover,
+	)
+
 	ff.Solve()
 }
