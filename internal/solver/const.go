@@ -6,11 +6,11 @@ const (
 	Width  = 6
 	Height = 6
 
-	FinishXFrom = 3
-	FinishXTo   = 4
+	FinishXFrom = 2
+	FinishXTo   = 3
 
-	FinishYFrom = 3
-	FinishYTo   = 4
+	FinishYFrom = 2
+	FinishYTo   = 3
 )
 
 type Position struct {
