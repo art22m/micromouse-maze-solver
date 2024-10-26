@@ -44,6 +44,8 @@ type CellResp struct {
 const wallThreshold float64 = 100
 
 func (c CellResp) ToCell(robotDir maze.Direction) Cell {
+	fmt.Println("robotDir", robotDir)
+	fmt.Println("sensors", c.Laser)
 	var w maze.Wall
 	if c.Laser.Back < wallThreshold {
 		switch robotDir {
@@ -93,6 +95,9 @@ func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 			w.Add(maze.U)
 		}
 	}
+
+	fmt.Println("wall", w)
+
 	return Cell{
 		Wall: w,
 	}
