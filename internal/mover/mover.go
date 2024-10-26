@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 
 	"jackson/internal/maze"
@@ -40,10 +41,12 @@ type Mover interface {
 	CellState() Cell
 }
 
-type float float32
-
 type VagifMover struct {
-	angle   float
+	angle   int // from 0 to 360 degrees
+	front   int
+	back    int
+	left    int
+	right   int
 	robotIP string
 	ID      string
 }
@@ -114,20 +117,67 @@ func (m VagifMover) getSensor() (*CellResp, error) {
 	return &cellResp, err
 }
 
-func (m VagifMover) isNotAimedAtCenter() bool {
-	return true
+const (
+	Front     = 0
+	Right     = 90
+	Down      = 180
+	Left      = 270
+	Tolerance = 5 // допустимая погрешность
+)
+
+func (m VagifMover) closestDirectionAndAngle() (string, int) {
+	directions := map[string]int{
+		"Front": Front,
+		"Right": Right,
+		"Down":  Down,
+		"Left":  Left,
+	}
+
+	minDiff := 360.0
+	closest := ""
+	var angleDiff int
+
+	for dir, angle := range directions {
+		diff := angle - m.angle
+		if diff > 180 {
+			diff -= 360
+		} else if diff < -180 {
+			diff += 360
+		}
+
+		if math.Abs(float64(diff)) < minDiff {
+			minDiff = math.Abs(float64(diff))
+			closest = dir
+			angleDiff = diff
+		}
+	}
+
+	return closest, angleDiff
 }
 
-func (m VagifMover) centering() {
+func (m VagifMover) isNotAimedAtCenter() bool {
+	_, angleDiff := m.closestDirectionAndAngle()
+	return math.Abs(float64(angleDiff)) > Tolerance
+}
 
+// Метод для центрирования робота к ближайшей оси
+func (m VagifMover) centering() {
+	_, angleDiff := m.closestDirectionAndAngle()
+
+	if angleDiff > 0 {
+		m.RotateRight(int(angleDiff))
+	} else if angleDiff < 0 {
+		m.RotateRight(int(-angleDiff))
+	} else {
+		fmt.Println("Робот уже отцентрован.")
+	}
 }
 
 func (m VagifMover) Forward(cell int) {
 	if m.isNotAimedAtCenter() {
 		m.centering()
 	}
-	// get current angle from memory
-	// if angle incorrect -> small rotation
+
 	// transform cell parameter to mm
 	// send command to mouse
 	// check position and angle
@@ -138,10 +188,23 @@ func (m VagifMover) Backward(cell int) {
 	// same as forward
 }
 
+func (m VagifMover) RotateLeft(degrees int) {
+	_, err := m.move("left", degrees)
+	if err != nil {
+		return
+	}
+}
+
 func (m VagifMover) Left() {
 	// get current angle from memory
 }
 
+func (m VagifMover) RotateRight(degrees int) {
+	_, err := m.move("right", degrees)
+	if err != nil {
+		return
+	}
+}
 func (m VagifMover) Right() {
 	// same as Left
 }
