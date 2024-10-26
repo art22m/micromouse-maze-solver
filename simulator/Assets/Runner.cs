@@ -160,7 +160,7 @@ public class Runner : MonoBehaviour
         SensorResponse resp = new SensorResponse();
 
         resp.imu = new Imu();
-        resp.imu.yaw = mouseController.rb.rotation;
+        resp.imu.yaw = (mouseController.rb.rotation % 360 + 360) % 360;
         resp.laser = new Laser();
         resp.laser._1 = mouseController.mouse.GetComponent<Mouse>().backward.distance;
         resp.laser._2 = mouseController.mouse.GetComponent<Mouse>().left.distance;
