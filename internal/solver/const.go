@@ -13,3 +13,7 @@ const (
 	FinishYFrom = 7
 	FinishYTo   = 8
 )
+
+type Position struct {
+	x, y int
+}
