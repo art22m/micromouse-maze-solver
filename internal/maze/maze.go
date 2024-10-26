@@ -51,8 +51,8 @@ func (w Wall) Contains(wc Wall) bool {
 
 // Add adds wall
 // NOTE: wc should be only L R U D
-func (w Wall) Add(wc Wall) {
-	w &= wc
+func (w *Wall) Add(wc Wall) {
+	*w &= wc
 }
 
 func abs(v int) int {
