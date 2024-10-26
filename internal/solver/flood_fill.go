@@ -109,7 +109,7 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 }
 
 func (f *FloodFill) getAndUpdateWalls() {
-	state := f.mo.CellState()
+	state := f.mo.CellState(f.dir)
 	f.updateWallsIfNeeded(f.pos, state.Wall)
 	f.updateNeighboursWalls(f.pos, state.Wall)
 }

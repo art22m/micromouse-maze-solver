@@ -18,7 +18,7 @@ type Mover interface {
 	Right()
 	Rotate()
 
-	CellState() Cell
+	CellState(d maze.Direction) Cell
 }
 
 type Cell struct {
@@ -43,19 +43,55 @@ type CellResp struct {
 
 const wallThreshold float64 = 100
 
-func (c CellResp) ToCell() Cell {
+func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 	var w maze.Wall
 	if c.Laser.Back < wallThreshold {
-		w.Add(maze.D)
+		switch robotDir {
+		case maze.Up:
+			w.Add(maze.D)
+		case maze.Right:
+			w.Add(maze.L)
+		case maze.Down:
+			w.Add(maze.U)
+		case maze.Left:
+			w.Add(maze.R)
+		}
 	}
 	if c.Laser.Front < wallThreshold {
-		w.Add(maze.U)
+		switch robotDir {
+		case maze.Up:
+			w.Add(maze.U)
+		case maze.Right:
+			w.Add(maze.R)
+		case maze.Down:
+			w.Add(maze.D)
+		case maze.Left:
+			w.Add(maze.L)
+		}
 	}
 	if c.Laser.Left < wallThreshold {
-		w.Add(maze.L)
+		switch robotDir {
+		case maze.Up:
+			w.Add(maze.L)
+		case maze.Right:
+			w.Add(maze.U)
+		case maze.Down:
+			w.Add(maze.R)
+		case maze.Left:
+			w.Add(maze.D)
+		}
 	}
 	if c.Laser.Right < wallThreshold {
-		w.Add(maze.R)
+		switch robotDir {
+		case maze.Up:
+			w.Add(maze.R)
+		case maze.Right:
+			w.Add(maze.D)
+		case maze.Down:
+			w.Add(maze.L)
+		case maze.Left:
+			w.Add(maze.U)
+		}
 	}
 	return Cell{
 		Wall: w,

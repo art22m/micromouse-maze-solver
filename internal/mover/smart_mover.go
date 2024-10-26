@@ -3,6 +3,8 @@ package mover
 import (
 	"fmt"
 	"math"
+
+	"jackson/internal/maze"
 )
 
 type SmartMover struct {
@@ -120,7 +122,7 @@ func (m *SmartMover) Right() {
 	m.RotateRight(90)
 }
 
-func (m *SmartMover) CellState() Cell {
+func (m *SmartMover) CellState(d maze.Direction) Cell {
 	//resp, err := m.getSensor()
 	return Cell{}
 }

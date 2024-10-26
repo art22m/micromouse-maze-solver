@@ -2,6 +2,8 @@ package mover
 
 import (
 	"log"
+
+	"jackson/internal/maze"
 )
 
 type DummyMover struct {
@@ -53,10 +55,10 @@ func (m *DummyMover) Rotate() {
 	}
 }
 
-func (m *DummyMover) CellState() Cell {
+func (m *DummyMover) CellState(d maze.Direction) Cell {
 	resp, err := m.getSensor()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return resp.ToCell()
+	return resp.ToCell(d)
 }
