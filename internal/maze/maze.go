@@ -12,23 +12,25 @@ const (
 type Wall int
 
 const (
-	L Wall = iota + 1
-	U
-	R
-	D
+	L Wall = 1 << 0
+	U      = 1 << 1
+	R      = 1 << 2
+	D      = 1 << 3
 
-	LD
-	RD
-	UR
-	LU
+	LD = L | D
+	RD = R | D
+	UR = U | R
+	UL = U | L
+	LR = L | R
+	UD = U | D
 
-	LR
-	UD
-	LRD
-	URD
+	LRD = L | R | D
+	URD = U | R | D
+	LUR = L | U | R
+	LUD = L | U | D
 
-	LUR
-	LUD
-	Empty
-	Full
+	Empty = 0
+	Full  = L | U | R | D
+
+	Unknown = 42
 )
