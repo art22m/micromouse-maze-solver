@@ -153,7 +153,7 @@ func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
 	if !validPosition(pos.x, pos.y) {
 		return
 	}
-	f.cells[pos.x][pos.y] = wall
+	f.cells[pos.x][pos.y] |= wall
 }
 
 func (f *FloodFill) updateNeighboursWalls(pos Position, wall ma.Wall) {
