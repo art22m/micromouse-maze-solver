@@ -52,6 +52,10 @@ func (f *FloodFill) Solve() {
 		}
 
 		f.getAndUpdateWalls()
+
+		f.printWalls()
+		f.printFlood()
+
 		f.floodFill()
 		f.move()
 	}
@@ -216,6 +220,7 @@ func (f *FloodFill) isOpen(x1, y1, x2, y2 int) bool {
 }
 
 func (f *FloodFill) printFlood() {
+	fmt.Println("----flood-----")
 	for i := Height - 1; i >= 0; i-- {
 		for j := 0; j < Width; j++ {
 			fmt.Print(f.flood[i][j], " ")
@@ -226,6 +231,7 @@ func (f *FloodFill) printFlood() {
 }
 
 func (f *FloodFill) printWalls() {
+	fmt.Println("----walls-----")
 	for i := Height - 1; i >= 0; i-- {
 		for j := 0; j < Width; j++ {
 			fmt.Print(f.cells[i][j], " ")
