@@ -177,7 +177,7 @@ func (m VagifMover) Forward(cell int) {
 	if m.isNotAimedAtCenter() {
 		m.centering()
 	}
-
+	m.move("forward", cell*180)
 	// transform cell parameter to mm
 	// send command to mouse
 	// check position and angle
@@ -186,6 +186,7 @@ func (m VagifMover) Forward(cell int) {
 
 func (m VagifMover) Backward(cell int) {
 	// same as forward
+	m.move("backward", cell*180)
 }
 
 func (m VagifMover) RotateLeft(degrees int) {
@@ -197,6 +198,7 @@ func (m VagifMover) RotateLeft(degrees int) {
 
 func (m VagifMover) Left() {
 	// get current angle from memory
+	m.RotateLeft(90)
 }
 
 func (m VagifMover) RotateRight(degrees int) {
@@ -206,9 +208,10 @@ func (m VagifMover) RotateRight(degrees int) {
 	}
 }
 func (m VagifMover) Right() {
-	// same as Left
+	m.RotateRight(90)
 }
 
 func (m VagifMover) CellState() Cell {
+	resp, err := m.getSensor()
 	return Cell{}
 }
