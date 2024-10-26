@@ -94,6 +94,7 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 			continue
 		}
 		res = append(res, n)
+		fmt.Println(fmt.Sprintf("%#v", n))
 	}
 
 	if len(res) == 0 {
