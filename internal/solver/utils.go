@@ -22,16 +22,16 @@ func getNearest(x, from, to int) int {
 
 func getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
 	x, y := pos.x, pos.y
-	if checkPositionNotFinish(x-1, y) {
+	if validPosition(x-1, y) {
 		res = append(res, PositionWithDirection{Position{x - 1, y}, maze.Down})
 	}
-	if checkPositionNotFinish(x+1, y) {
+	if validPosition(x+1, y) {
 		res = append(res, PositionWithDirection{Position{x + 1, y}, maze.Up})
 	}
-	if checkPositionNotFinish(x, y-1) {
+	if validPosition(x, y-1) {
 		res = append(res, PositionWithDirection{Position{x, y - 1}, maze.Left})
 	}
-	if checkPositionNotFinish(x, y+1) {
+	if validPosition(x, y+1) {
 		res = append(res, PositionWithDirection{Position{x, y + 1}, maze.Right})
 	}
 	return res
