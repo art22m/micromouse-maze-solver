@@ -73,6 +73,11 @@ func (f *FloodFill) move() {
 }
 
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
+	//Up Direction = iota + 1
+	//Right
+	//Down
+	//Left
+
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		fmt.Println("no rotate")
@@ -81,16 +86,42 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 		fmt.Println("rotate 180")
 		f.mo.Rotate()
 	default:
-		if int(nextPos.Direction-f.dir) > 0 {
-			f.mo.Right()
-			fmt.Println("rotate right")
-			return
+		switch f.dir {
+		case ma.Left:
+			if nextPos.Direction == ma.Up {
+				f.mo.Right()
+			} else {
+				f.mo.Left()
+			}
+		case ma.Right:
+			if nextPos.Direction == ma.Up {
+				f.mo.Left()
+			} else {
+				f.mo.Right()
+			}
+		case ma.Down:
+			if nextPos.Direction == ma.Left {
+				f.mo.Right()
+			} else {
+				f.mo.Left()
+			}
+		case ma.Up:
+			if nextPos.Direction == ma.Left {
+				f.mo.Left()
+			} else {
+				f.mo.Right()
+			}
 		}
-		if int(nextPos.Direction-f.dir) < 0 {
-			f.mo.Left()
-			fmt.Println("rotate left")
-			return
-		}
+		//if int(nextPos.Direction-f.dir) > 0 {
+		//	f.mo.Right()
+		//	fmt.Println("rotate right")
+		//	return
+		//}
+		//if int(nextPos.Direction-f.dir) < 0 {
+		//	f.mo.Left()
+		//	fmt.Println("rotate left")
+		//	return
+		//}
 		panic("invalid diff turn")
 	}
 }
