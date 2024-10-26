@@ -81,28 +81,22 @@ public class MouseController : MonoBehaviour
 
     void FixedUpdate() {
         if (state == State.Idle) {
+            if (onFinish != null) {
+                onFinish();
+                onFinish = null;
+            }
             return;
         }
 
         if (state == State.Moving) {
             Vector2 diff = positionTarget - rb.position;
             if (diff.magnitude < mouseSpeed) {
-                if (diff.magnitude <= 100) {
-                    rb.MovePosition(positionTarget);
-                } else {
-                    rb.position = positionTarget;
-                }
-                onFinish();
+                rb.MovePosition(positionTarget);
                 state = State.Idle;
             } else {
-                if (mouseSpeed <= 100) {
-                    rb.MovePosition(rb.position + diff.normalized * mouseSpeed);
-                } else {
-                    rb.position += diff.normalized * mouseSpeed;
-                }
+                rb.MovePosition(rb.position + diff.normalized * mouseSpeed);
                 moveCycles++;
                 if (moveCycles >= maxMoveCycles) {
-                    onFinish();
                     state = State.Idle; 
                 }
             }
@@ -112,7 +106,6 @@ public class MouseController : MonoBehaviour
             float diff = rotationTarget - rb.rotation;
             if (math.abs(diff) < mouseRotationSpeed) {
                 rb.MoveRotation(rotationTarget);
-                onFinish();
                 state = State.Idle;
             } else {
                 if (diff > 0) {
@@ -122,7 +115,6 @@ public class MouseController : MonoBehaviour
                 }
                 moveCycles++;
                 if (moveCycles >= maxMoveCycles) {
-                    onFinish();
                     state = State.Idle; 
                 }
             }
