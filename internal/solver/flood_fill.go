@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sort"
 
 	ma "jackson/internal/maze"
 	mo "jackson/internal/mover"
@@ -14,13 +15,13 @@ type FloodFill struct {
 	flood [][]int
 	cells [][]ma.Wall
 
-	or ma.Orientation
-	mo mo.Mover
+	dir ma.Direction
+	mo  mo.Mover
 
 	Position
 }
 
-func NewFloodFill(or ma.Orientation, mover mo.Mover) FloodFill {
+func NewFloodFill(dir ma.Direction, mover mo.Mover) FloodFill {
 	flood := make([][]int, Height)
 	cells := make([][]ma.Wall, Height)
 	for i := 0; i < Height; i++ {
@@ -39,20 +40,62 @@ func NewFloodFill(or ma.Orientation, mover mo.Mover) FloodFill {
 		flood: flood,
 		cells: cells,
 		mo:    mover,
-		or:    or,
+		dir:   dir,
 	}
 }
 
 func (f *FloodFill) Solve() {
 	for {
 		if f.getFlood(f.Position) == 0 {
-			log.Println("!!end")
+			log.Println("reached finish")
 			break
 		}
 
+		f.getAndUpdateWalls()
 		f.floodFill()
+		f.move()
+	}
+}
+
+func (f *FloodFill) move() {
+	nextPos := f.getNextPosition()
+
+	f.rotateIfNeeded(nextPos)
+
+}
+
+func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
+	switch {
+	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 0:
+		return
+	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 2:
+		f.mo.Right()
+		f.mo.Right()
+	default:
 
 	}
+}
+
+func (f *FloodFill) getNextPosition() PositionWithDirection {
+	res := make([]PositionWithDirection, 0, 4)
+	for _, n := range getNeighboursWithDirection(f.x, f.y) {
+		if !f.isOpen(f.x, f.y, n.x, n.y) {
+			continue
+		}
+		res = append(res, n)
+	}
+
+	if len(res) == 0 {
+		panic("invalid state")
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return f.getFlood(res[i].Position) < f.getFlood(res[j].Position) ||
+			(f.getFlood(res[i].Position) == f.getFlood(res[j].Position) &&
+				f.dir.TurnsCount(res[i].Direction) < f.dir.TurnsCount(res[j].Direction))
+	})
+
+	return res[0]
 }
 
 func (f *FloodFill) getAndUpdateWalls() {
@@ -89,7 +132,7 @@ func (f *FloodFill) floodFill() {
 	st.Push(Position{f.x, f.y})
 	for !st.Empty() {
 		topPos := st.Pop()
-		minPos := f.getMinOpenNeighbour(topPos)
+		minPos := f.getMinOpenNeighbourNotFinish(topPos)
 
 		if f.getFlood(topPos)-1 == f.getFlood(minPos) {
 			continue
@@ -114,7 +157,7 @@ func (f *FloodFill) getCell(pos Position) ma.Wall {
 	return f.cells[pos.x][pos.y]
 }
 
-func (f *FloodFill) getMinOpenNeighbour(pos Position) (res Position) {
+func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
 	x, y := pos.x, pos.y
 	mn := math.MaxInt
 	for _, n := range getNeighboursNotFinish(x, y) {

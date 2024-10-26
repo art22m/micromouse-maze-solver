@@ -1,5 +1,7 @@
 package solver
 
+import "jackson/internal/maze"
+
 func abs(v int) int {
 	if v > 0 {
 		return v
@@ -16,6 +18,22 @@ func getNearest(x, from, to int) int {
 	default:
 		return x
 	}
+}
+
+func getNeighboursWithDirection(x, y int) (res []PositionWithDirection) {
+	if checkPositionNotFinish(x-1, y) {
+		res = append(res, PositionWithDirection{Position{x - 1, y}, maze.Down})
+	}
+	if checkPositionNotFinish(x+1, y) {
+		res = append(res, PositionWithDirection{Position{x + 1, y}, maze.Up})
+	}
+	if checkPositionNotFinish(x, y-1) {
+		res = append(res, PositionWithDirection{Position{x, y - 1}, maze.Left})
+	}
+	if checkPositionNotFinish(x, y+1) {
+		res = append(res, PositionWithDirection{Position{x, y + 1}, maze.Right})
+	}
+	return res
 }
 
 func getNeighboursNotFinish(x, y int) (res []Position) {

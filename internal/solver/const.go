@@ -1,5 +1,7 @@
 package solver
 
+import "jackson/internal/maze"
+
 const (
 	Width  = 6
 	Height = 6
@@ -16,4 +18,9 @@ const (
 
 type Position struct {
 	x, y int
+}
+
+type PositionWithDirection struct {
+	Position
+	maze.Direction
 }

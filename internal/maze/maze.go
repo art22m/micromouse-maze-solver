@@ -1,13 +1,23 @@
 package maze
 
-type Orientation int
+type Direction int
 
 const (
-	Up Orientation = iota + 1
+	Up Direction = iota + 1
 	Right
 	Down
 	Left
 )
+
+func (d Direction) TurnsCount(dc Direction) int {
+	if d == dc {
+		return 0
+	}
+	if abs(int(d-dc)) == 1 || abs(int(d-dc)) == 3 {
+		return 1
+	}
+	return 2
+}
 
 type Wall int
 
@@ -37,4 +47,11 @@ const (
 
 func (w Wall) Contains(wc Wall) bool {
 	return w&wc == wc
+}
+
+func abs(v int) int {
+	if v > 0 {
+		return v
+	}
+	return -v
 }
