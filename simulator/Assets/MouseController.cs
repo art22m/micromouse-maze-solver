@@ -82,7 +82,7 @@ public class MouseController : MonoBehaviour
         if (state == State.Moving) {
             Vector2 diff = positionTarget - rb.position;
             if (diff.magnitude < mouseSpeed) {
-                if (diff.magnitude < 100) {
+                if (diff.magnitude <= 100) {
                     rb.MovePosition(positionTarget);
                 } else {
                     rb.position = positionTarget;
@@ -90,7 +90,7 @@ public class MouseController : MonoBehaviour
                 onFinish();
                 state = State.Idle;
             } else {
-                if (diff.magnitude < 100) {
+                if (diff.magnitude <= 100) {
                     rb.MovePosition(rb.position + diff.normalized * mouseSpeed);
                 } else {
                     rb.position += diff.normalized * mouseSpeed;
