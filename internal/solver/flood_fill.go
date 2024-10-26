@@ -81,7 +81,7 @@ func (f *FloodFill) floodFill() {
 	}
 }
 
-func (f *FloodFill) setFlood(pos Position, val int) int {
+func (f *FloodFill) setFlood(pos Position, val int) {
 	f.flood[pos.x][pos.y] = val
 }
 
