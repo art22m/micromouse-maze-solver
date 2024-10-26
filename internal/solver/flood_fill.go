@@ -59,6 +59,7 @@ func (f *FloodFill) Solve() {
 
 func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
+	fmt.Println(nextPos)
 
 	f.rotateIfNeeded(nextPos)
 	f.dir = nextPos.Direction
@@ -69,9 +70,9 @@ func (f *FloodFill) move() {
 
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 	switch {
-	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 0:
+	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		return
-	case f.dir.TurnsCount(nextPos.Direction-f.dir) == 2:
+	case f.dir.TurnsCount(nextPos.Direction) == 2:
 		f.mo.Rotate()
 	default:
 		if int(nextPos.Direction-f.dir) > 0 {
