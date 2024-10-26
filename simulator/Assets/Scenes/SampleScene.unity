@@ -374,7 +374,7 @@ MonoBehaviour:
   mapSize: 16
   poleSize: 12
   wallLength: 168
-  _MovePort: 8080
+  _Port: 8080
 --- !u!4 &1046894738
 Transform:
   m_ObjectHideFlags: 0
@@ -439,8 +439,8 @@ MonoBehaviour:
   mousePrefab: {fileID: 9154829941279353625, guid: e07051d58e4164233a23274f539b509d, type: 3}
   mouseWidth: 88
   mouseHeight: 70
-  mouseSpeed: 10
-  mouseRotationSpeed: 10
+  mouseSpeed: 30
+  mouseRotationSpeed: 30
   mouse: {fileID: 0}
   rb: {fileID: 0}
 --- !u!1 &2069826899
@@ -489,7 +489,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   square: {fileID: 6160892510778916823, guid: 3ddf77a182d6a43a5a5025ed1fb1e326, type: 3}
   sceneCamera: {fileID: 519420031}
-  seed: 4
+  seed: 6
   loops: 0
   removeDanglingPoles: 1
 --- !u!1660057539 &9223372036854775807
