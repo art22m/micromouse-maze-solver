@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"jackson/internal/maze"
 )
 
 type Cell struct {
-	Left, Right, Forward, Backward int
+	Wall maze.Wall
 }
 
 type Mover interface {
