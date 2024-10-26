@@ -13,6 +13,7 @@ public class MouseController : MonoBehaviour
     public float mouseRotationSpeed;
 
     public GameObject trail;
+    public Transform trailParent;
 
     public GameObject mouse;
     public Rigidbody2D rb;
@@ -51,7 +52,7 @@ public class MouseController : MonoBehaviour
             return false;
         }
 
-        GameObject t = Instantiate(trail, rb.position, Quaternion.Euler(0, 0, rb.rotation));
+        GameObject t = Instantiate(trail, rb.position, Quaternion.Euler(0, 0, rb.rotation), trailParent);
         t.transform.localScale = new Vector3(mouseHeight / 2, mouseHeight / 2, 1);
 
         float distance = diff.magnitude;
