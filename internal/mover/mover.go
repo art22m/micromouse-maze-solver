@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"jackson/internal/maze"
@@ -11,6 +12,22 @@ import (
 
 type Cell struct {
 	Wall maze.Wall
+}
+
+type CellResp struct {
+	Laser struct {
+		Back    int `json:"1"`
+		Left    int `json:"2"`
+		Right45 int `json:"3"`
+		Front   int `json:"4"`
+		Right   int `json:"5"`
+		Left45  int `json:"6"`
+	} `json:"laser"`
+	Imu struct {
+		Roll  int `json:"roll"`
+		Pitch int `json:"pitch"`
+		Yaw   int `json:"yaw"`
+	} `json:"imu"`
 }
 
 type Mover interface {
@@ -64,7 +81,7 @@ func (m VagifMover) move(direction string, value int) (*http.Response, error) {
 	return resp, err
 }
 
-func (m VagifMover) getSensor() (*http.Response, error) {
+func (m VagifMover) getSensor() (*CellResp, error) {
 	/* sensors POST:
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
@@ -82,7 +99,19 @@ func (m VagifMover) getSensor() (*http.Response, error) {
 	req.Header.Add("Content-Type", `application/json`)
 
 	resp, err := http.DefaultClient.Do(req)
-	return resp, err
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the JSON response into the struct
+	var cellResp CellResp
+	err = json.Unmarshal(body, &cellResp)
+	if err != nil {
+		return nil, err
+	}
+	return &cellResp, err
 }
 
 func (m VagifMover) isNotAimedAtCenter() bool {
@@ -118,10 +147,5 @@ func (m VagifMover) Right() {
 }
 
 func (m VagifMover) CellState() Cell {
-	return Cell{
-		Left:     0,
-		Right:    0,
-		Forward:  0,
-		Backward: 0,
-	}
+	return Cell{}
 }
