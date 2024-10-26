@@ -224,3 +224,13 @@ func (f *FloodFill) printFlood() {
 	}
 	fmt.Println("---------")
 }
+
+func (f *FloodFill) printWalls() {
+	for i := Height - 1; i >= 0; i-- {
+		for j := 0; j < Width; j++ {
+			fmt.Print(f.cells[i][j], " ")
+		}
+		fmt.Println()
+	}
+	fmt.Println("---------")
+}
