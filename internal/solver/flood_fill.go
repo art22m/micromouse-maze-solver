@@ -75,16 +75,20 @@ func (f *FloodFill) move() {
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
+		fmt.Println("no rotate")
 		return
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
+		fmt.Println("rotate 180")
 		f.mo.Rotate()
 	default:
 		if int(nextPos.Direction-f.dir) > 0 {
 			f.mo.Right()
+			fmt.Println("rotate right")
 			return
 		}
 		if int(nextPos.Direction-f.dir) < 0 {
 			f.mo.Left()
+			fmt.Println("rotate left")
 			return
 		}
 		panic("invalid diff turn")
