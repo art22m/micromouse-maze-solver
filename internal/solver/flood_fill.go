@@ -52,11 +52,11 @@ func (f *FloodFill) Solve() {
 		}
 
 		f.getAndUpdateWalls()
-
 		f.printWalls()
-		f.printFlood()
 
 		f.floodFill()
+		f.printFlood()
+
 		f.move()
 	}
 }
