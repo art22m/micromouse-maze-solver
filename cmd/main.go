@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	sensorsIP = ""
-	motorsIP  = ""
-	robotID   = ""
+	sensorsIP = "172.20.10.2:8080"
+	motorsIP  = "172.20.10.2:8080"
+	robotID   = "1"
 )
 
 func main() {
