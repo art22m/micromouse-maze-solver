@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	sensorsIP = "172.20.10.2:8080"
-	motorsIP  = "172.20.10.2:8080"
+	sensorsIP = "localhost:8080"
+	motorsIP  = "localhost:8080"
 	robotID   = "1"
 )
 
