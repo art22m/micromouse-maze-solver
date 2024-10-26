@@ -17,11 +17,10 @@ type FloodFill struct {
 
 	dir ma.Direction
 	mo  mo.Mover
-
-	Position
+	pos Position
 }
 
-func NewFloodFill(dir ma.Direction, mover mo.Mover) FloodFill {
+func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) FloodFill {
 	flood := make([][]int, Height)
 	cells := make([][]ma.Wall, Height)
 	for i := 0; i < Height; i++ {
@@ -41,12 +40,13 @@ func NewFloodFill(dir ma.Direction, mover mo.Mover) FloodFill {
 		cells: cells,
 		mo:    mover,
 		dir:   dir,
+		pos:   pos,
 	}
 }
 
 func (f *FloodFill) Solve() {
 	for {
-		if f.getFlood(f.Position) == 0 {
+		if f.getFlood(f.pos) == 0 {
 			log.Println("reached finish")
 			break
 		}
@@ -61,7 +61,10 @@ func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
 
 	f.rotateIfNeeded(nextPos)
+	f.dir = nextPos.Direction
 
+	f.mo.Forward(1)
+	f.pos = nextPos.Position
 }
 
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
@@ -72,14 +75,22 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 		f.mo.Right()
 		f.mo.Right()
 	default:
-
+		if int(nextPos.Direction-f.dir) > 0 {
+			f.mo.Right()
+			return
+		}
+		if int(nextPos.Direction-f.dir) < 0 {
+			f.mo.Left()
+			return
+		}
+		panic("invalid diff turn")
 	}
 }
 
 func (f *FloodFill) getNextPosition() PositionWithDirection {
 	res := make([]PositionWithDirection, 0, 4)
-	for _, n := range getNeighboursWithDirection(f.x, f.y) {
-		if !f.isOpen(f.x, f.y, n.x, n.y) {
+	for _, n := range getNeighboursWithDirection(f.pos) {
+		if !f.isOpen(f.pos.x, f.pos.y, n.x, n.y) {
 			continue
 		}
 		res = append(res, n)
@@ -100,8 +111,8 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 
 func (f *FloodFill) getAndUpdateWalls() {
 	state := f.mo.CellState()
-	f.updateWallsIfNeeded(f.Position, state.Wall)
-	f.updateNeighboursWalls(f.Position, state.Wall)
+	f.updateWallsIfNeeded(f.pos, state.Wall)
+	f.updateNeighboursWalls(f.pos, state.Wall)
 }
 
 func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
@@ -129,7 +140,7 @@ func (f *FloodFill) updateNeighboursWalls(pos Position, wall ma.Wall) {
 
 func (f *FloodFill) floodFill() {
 	st := stack.Stack[Position]{}
-	st.Push(Position{f.x, f.y})
+	st.Push(f.pos)
 	for !st.Empty() {
 		topPos := st.Pop()
 		minPos := f.getMinOpenNeighbourNotFinish(topPos)

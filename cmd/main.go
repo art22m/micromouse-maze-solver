@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-
 	"jackson/internal/maze"
 	"jackson/internal/solver"
 )
 
 func main() {
-	fmt.Println("district")
-	ff := solver.NewFloodFill(maze.Up, nil)
+	ff := solver.NewFloodFill(maze.Up, solver.NewPosition(0, 0), nil)
 	ff.Solve()
 }

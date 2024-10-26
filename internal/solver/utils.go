@@ -20,7 +20,8 @@ func getNearest(x, from, to int) int {
 	}
 }
 
-func getNeighboursWithDirection(x, y int) (res []PositionWithDirection) {
+func getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
+	x, y := pos.x, pos.y
 	if checkPositionNotFinish(x-1, y) {
 		res = append(res, PositionWithDirection{Position{x - 1, y}, maze.Down})
 	}
