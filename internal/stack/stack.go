@@ -16,14 +16,13 @@ func (s *Stack[T]) Push(value T) {
 	s.values = append(s.values, value)
 }
 
-func (s *Stack[T]) Pop() (T, bool) {
+func (s *Stack[T]) Pop() T {
 	if len(s.values) == 0 {
-		var t T
-		return t, false
+		panic("empty stack")
 	}
 	value := s.values[len(s.values)-1]
 	s.values = s.values[:len(s.values)-1]
-	return value, true
+	return value
 }
 
 func (s *Stack[T]) Print() {
