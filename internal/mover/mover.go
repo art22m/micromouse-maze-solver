@@ -44,7 +44,7 @@ func (m VagifMover) move(direction string, value int) (*http.Response, error) {
 	http://[robot_ip]/move
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
-	reqUrl := fmt.Sprint("http://", m.robotIP, "/move")
+	reqUrl := fmt.Sprintf("http://%s/%s", m.robotIP, "move")
 
 	reqBody, _ := json.Marshal(struct {
 		Id        string `json:"id"`
@@ -69,7 +69,7 @@ func (m VagifMover) getSensor() (*http.Response, error) {
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
 	*/
-	reqUrl := fmt.Sprint("http://", m.robotIP, "/sensor")
+	reqUrl := fmt.Sprintf("http://%s/%s", m.robotIP, "sensor")
 
 	reqBody, _ := json.Marshal(map[string]string{
 		"id":   m.ID,
