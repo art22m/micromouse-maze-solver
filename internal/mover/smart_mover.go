@@ -4,6 +4,8 @@ import (
 	"log"
 	"math"
 	"time"
+
+	"jackson/internal/maze"
 )
 
 type SmartMover struct {
@@ -192,4 +194,12 @@ func (m *SmartMover) Right() {
 
 func (m *SmartMover) Rotate() {
 	m.RotateRight(180)
+}
+
+func (m *SmartMover) CellState(d maze.Direction) Cell {
+	resp, err := m.getSensor()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return resp.ToCell(d)
 }
