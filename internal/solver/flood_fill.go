@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"time"
 
 	ma "jackson/internal/maze"
 	mo "jackson/internal/mover"
@@ -21,8 +22,9 @@ type FloodFillConfig struct {
 }
 
 type FloodFill struct {
-	flood [][]int
-	cells [][]ma.Wall
+	flood       [][]int
+	cachedFlood [][]int
+	cells       [][]ma.Wall
 
 	moveForwardOnly bool
 
@@ -34,6 +36,8 @@ type FloodFill struct {
 	pos Position
 
 	mo mo.Mover
+
+	iteration int
 }
 
 func NewFloodFill(config FloodFillConfig) *FloodFill {
@@ -47,41 +51,71 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 	}
 
 	ff := &FloodFill{
-		flood:           flood,
-		cells:           cells,
+		flood:       flood,
+		cachedFlood: nil,
+		cells:       cells,
+
 		mo:              config.Mover,
 		pos:             config.StartPosition,
 		dir:             config.StartDirection,
 		moveForwardOnly: config.MoveForwardOnly,
 
 		finishXFrom: finishXFrom,
-		finishXTo:   finishXTo,
-
 		finishYFrom: finishYFrom,
+		finishXTo:   finishXTo,
 		finishYTo:   finishYTo,
 	}
 
 	ff.dummyFloodFill()
 	ff.printFlood()
+
 	return ff
 }
 
 func (f *FloodFill) Solve() {
-	it := 0
+	f.startToFinish()
+	time.Sleep(time.Second)
+	f.finishToStart()
+}
+
+func (f *FloodFill) startToFinish() {
+	log.Println("finding path from start to finish")
+	f.start()
+}
+
+func (f *FloodFill) finishToStart() {
+	log.Println("finding path from finish to start")
+
+	f.cachedFlood = f.flood
+	f.flood = make([][]int, height)
+	for i := 0; i < height; i++ {
+		f.flood[i] = make([]int, width)
+	}
+
+	f.finishXFrom, f.finishXTo = 0, 0
+	f.finishYFrom, f.finishYTo = 0, 0
+
+	f.dummyFloodFill()
+	f.start()
+}
+
+func (f *FloodFill) start() {
 	for {
 		if f.getFlood(f.pos) == 0 {
-			log.Println("reached finish")
 			break
 		}
 
-		it++
-		log.Println()
-		log.Printf("iteration #%d", it)
+		f.iteration++
+		log.Println("-------------")
+		log.Printf("iteration #%d", f.iteration)
 
 		f.updateWalls()
 		f.smartFloodFill()
 		f.move()
 	}
+	log.Println("finish was reached")
+	f.printFlood()
+	f.printWalls()
 }
 
 func (f *FloodFill) move() {
@@ -205,8 +239,8 @@ func (f *FloodFill) dummyFloodFill() {
 	visited := make(map[Position]struct{}, height*width)
 	q := queue.Queue[Position]{}
 
-	for x := finishXFrom; x <= finishXTo; x++ {
-		for y := finishYFrom; y <= finishYTo; y++ {
+	for x := f.finishXFrom; x <= f.finishXTo; x++ {
+		for y := f.finishYFrom; y <= f.finishYTo; y++ {
 			pos := Position{x: x, y: y}
 			f.setFlood(pos, 0)
 			visited[pos] = struct{}{}
@@ -262,7 +296,7 @@ func (f *FloodFill) printFlood() {
 	log.Println("----flood-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			fmt.Printf("%-3v", f.flood[i][j])
+			fmt.Printf("%-4v", f.flood[i][j])
 		}
 		fmt.Println()
 	}
@@ -273,7 +307,7 @@ func (f *FloodFill) printWalls() {
 	log.Println("----walls-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			fmt.Printf("%-3v", f.cells[i][j])
+			fmt.Printf("%-4v", f.cells[i][j])
 		}
 		fmt.Println()
 	}
