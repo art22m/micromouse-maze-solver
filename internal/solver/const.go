@@ -3,14 +3,14 @@ package solver
 import "jackson/internal/maze"
 
 const (
-	Width  = 16
-	Height = 16
+	width  = 16
+	height = 16
 
-	FinishXFrom = 7
-	FinishXTo   = 8
+	finishXFrom = 7
+	finishXTo   = 8
 
-	FinishYFrom = 7
-	FinishYTo   = 8
+	finishYFrom = 7
+	finishYTo   = 8
 )
 
 type Position struct {

@@ -21,16 +21,16 @@ type FloodFill struct {
 }
 
 func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
-	flood := make([][]int, Height)
-	cells := make([][]ma.Wall, Height)
-	for i := 0; i < Height; i++ {
-		flood[i] = make([]int, Width)
-		cells[i] = make([]ma.Wall, Width)
+	flood := make([][]int, height)
+	cells := make([][]ma.Wall, height)
+	for i := 0; i < height; i++ {
+		flood[i] = make([]int, width)
+		cells[i] = make([]ma.Wall, width)
 	}
 
-	for i := 0; i < Height; i++ {
-		for j := 0; j < Width; j++ {
-			flood[i][j] = abs(i-getNearest(i, FinishXFrom, FinishXTo)) + abs(j-getNearest(j, FinishYFrom, FinishYTo))
+	for i := 0; i < height; i++ {
+		for j := 0; j < width; j++ {
+			flood[i][j] = abs(i-getNearest(i, finishXFrom, finishXTo)) + abs(j-getNearest(j, finishYFrom, finishYTo))
 			cells[i][j] = 0
 		}
 	}
@@ -52,18 +52,13 @@ func (f *FloodFill) Solve() {
 		}
 
 		f.getAndUpdateWalls()
-		f.printWalls()
-
 		f.floodFill()
-		f.printFlood()
-
 		f.move()
 	}
 }
 
 func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
-	fmt.Println(nextPos)
 
 	f.rotateIfNeeded(nextPos)
 	f.dir = nextPos.Direction
@@ -73,11 +68,6 @@ func (f *FloodFill) move() {
 }
 
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
-	//Up Direction = iota + 1
-	//Right
-	//Down
-	//Left
-
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		fmt.Println("no rotate")
@@ -85,6 +75,7 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
 		fmt.Println("rotate 180")
 		f.mo.Rotate()
+		return
 	default:
 		switch f.dir {
 		case ma.Left:
@@ -123,15 +114,14 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 func (f *FloodFill) getNextPosition() PositionWithDirection {
 	res := make([]PositionWithDirection, 0, 4)
 	for _, n := range getNeighboursWithDirection(f.pos) {
-		if !f.isOpen(f.pos.x, f.pos.y, n.x, n.y) {
+		if !f.isOpen(f.pos, n.Position) {
 			continue
 		}
 		res = append(res, n)
-		fmt.Println(fmt.Sprintf("%#v", n))
 	}
 
 	if len(res) == 0 {
-		panic("invalid state")
+		panic("no next position")
 	}
 
 	sort.Slice(res, func(i, j int) bool {
@@ -146,7 +136,7 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 func (f *FloodFill) getAndUpdateWalls() {
 	state := f.mo.CellState(f.dir)
 	f.updateWallsIfNeeded(f.pos, state.Wall)
-	f.updateNeighboursWalls(f.pos, state.Wall)
+	f.updateNeighboursWallsIfNeeded(f.pos, state.Wall)
 }
 
 func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
@@ -156,7 +146,7 @@ func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
 	f.cells[pos.x][pos.y] |= wall
 }
 
-func (f *FloodFill) updateNeighboursWalls(pos Position, wall ma.Wall) {
+func (f *FloodFill) updateNeighboursWallsIfNeeded(pos Position, wall ma.Wall) {
 	x, y := pos.x, pos.y
 	if wall.Contains(ma.L) {
 		f.updateWallsIfNeeded(Position{x, y - 1}, ma.R)
@@ -203,10 +193,9 @@ func (f *FloodFill) getCell(pos Position) ma.Wall {
 }
 
 func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
-	x, y := pos.x, pos.y
 	mn := math.MaxInt
-	for _, n := range getNeighboursNotFinish(x, y) {
-		if !f.isOpen(x, y, n.x, n.y) {
+	for _, n := range getNeighboursNotFinish(pos) {
+		if !f.isOpen(pos, n) {
 			continue
 		}
 		if f.flood[n.x][n.y] < mn {
@@ -221,8 +210,8 @@ func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
 }
 
 func (f *FloodFill) getOpenNeighboursNotFinish(pos Position) (res []Position) {
-	for _, n := range getNeighboursNotFinish(pos.x, pos.y) {
-		if !f.isOpen(pos.x, pos.y, n.x, n.y) {
+	for _, n := range getNeighboursNotFinish(pos) {
+		if !f.isOpen(pos, n) {
 			continue
 		}
 		res = append(res, n)
@@ -230,7 +219,9 @@ func (f *FloodFill) getOpenNeighboursNotFinish(pos Position) (res []Position) {
 	return res
 }
 
-func (f *FloodFill) isOpen(x1, y1, x2, y2 int) bool {
+func (f *FloodFill) isOpen(from Position, to Position) bool {
+	x1, y1 := from.x, from.y
+	x2, y2 := to.x, to.y
 	if abs(x1-x2)+abs(y1-y2) == 0 || abs(x1-x2)+abs(y1-y2) > 1 {
 		panic("diagonal move or not neighbour")
 	}
@@ -250,8 +241,8 @@ func (f *FloodFill) isOpen(x1, y1, x2, y2 int) bool {
 
 func (f *FloodFill) printFlood() {
 	fmt.Println("----flood-----")
-	for i := Height - 1; i >= 0; i-- {
-		for j := 0; j < Width; j++ {
+	for i := height - 1; i >= 0; i-- {
+		for j := 0; j < width; j++ {
 			fmt.Print(f.flood[i][j], " ")
 		}
 		fmt.Println()
@@ -261,8 +252,8 @@ func (f *FloodFill) printFlood() {
 
 func (f *FloodFill) printWalls() {
 	fmt.Println("----walls-----")
-	for i := Height - 1; i >= 0; i-- {
-		for j := 0; j < Width; j++ {
+	for i := height - 1; i >= 0; i-- {
+		for j := 0; j < width; j++ {
 			fmt.Print(f.cells[i][j], " ")
 		}
 		fmt.Println()

@@ -37,7 +37,8 @@ func getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
 	return res
 }
 
-func getNeighboursNotFinish(x, y int) (res []Position) {
+func getNeighboursNotFinish(pos Position) (res []Position) {
+	x, y := pos.x, pos.y
 	if checkPositionNotFinish(x-1, y) {
 		res = append(res, Position{x - 1, y})
 	}
@@ -54,11 +55,11 @@ func getNeighboursNotFinish(x, y int) (res []Position) {
 }
 
 func validPosition(x, y int) bool {
-	return 0 <= x && x < Height && 0 <= y && y < Width
+	return 0 <= x && x < height && 0 <= y && y < width
 }
 
 func checkPositionNotFinish(x, y int) bool {
-	if FinishXFrom <= x && x <= FinishXTo && FinishYFrom <= y && y <= FinishYTo {
+	if finishXFrom <= x && x <= finishXTo && finishYFrom <= y && y <= finishYTo {
 		return false
 	}
 	return validPosition(x, y)
