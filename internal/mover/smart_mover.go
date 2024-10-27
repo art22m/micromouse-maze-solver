@@ -204,6 +204,7 @@ func (m *SmartMover) Rotate() {
 }
 
 func (m *SmartMover) CellState(d maze.Direction) Cell {
+	time.Sleep(allUpdateTime)
 	resp, err := m.getSensor()
 	if err != nil {
 		log.Fatal(err)
