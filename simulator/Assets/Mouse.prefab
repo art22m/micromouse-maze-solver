@@ -611,21 +611,21 @@ MonoBehaviour:
   forwardErrorMean: 0
   forwardErrorStd: 0.02
   forwardAbsErrorMean: 0
-  forwardAbsErrorStd: 3
+  forwardAbsErrorStd: 0
   backwardErrorMean: 0
   backwardErrorStd: 0.02
   backwardAbsErrorMean: 0
-  backwardAbsErrorStd: 3
+  backwardAbsErrorStd: 0
   rightErrorMean: 0
   rightErrorStd: 0.02
   rightAbsErrorMean: 0
-  rightAbsErrorStd: 3
+  rightAbsErrorStd: 0
   leftErrorMean: 0
   leftErrorStd: 0.02
   leftAbsErrorMean: 0
-  leftAbsErrorStd: 3
+  leftAbsErrorStd: 0
   yawAbsErrorStd: 1
-  northYawReading: 22
+  northYawReading: 0
   forwardErrorSeed: 1
   forwardAbsErrorSeed: 2
   backwardErrorSeed: 3
@@ -635,8 +635,8 @@ MonoBehaviour:
   leftErrorSeed: 7
   leftAbsErrorSeed: 8
   yawAbsErrorSeed: 9
-  laserUpdateIntervalSeconds: 1
-  yawUpdateIntervalSeconds: 1
+  laserUpdateIntervalSeconds: 0.3
+  yawUpdateIntervalSeconds: 0.3
   spreadSensorsUpdate: 1
   forward: {fileID: 3177784349784974923}
   backward: {fileID: 5630817239422893817}
