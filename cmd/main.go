@@ -39,5 +39,7 @@ func main() {
 	}
 
 	ff := solver.NewFloodFill(config)
-	ff.Solve()
+	visited, walls := ff.Solve()
+	
+	fmt.Println(visited, walls)
 }

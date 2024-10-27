@@ -24,6 +24,7 @@ type FloodFillConfig struct {
 type FloodFill struct {
 	flood       [][]int
 	cachedFlood [][]int
+	visited     [][]bool
 	cells       [][]ma.Wall
 
 	moveForwardOnly bool
@@ -45,15 +46,18 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 
 	flood := make([][]int, height)
 	cells := make([][]ma.Wall, height)
+	visited := make([][]bool, height)
 	for i := 0; i < height; i++ {
 		flood[i] = make([]int, width)
 		cells[i] = make([]ma.Wall, width)
+		visited[i] = make([]bool, width)
 	}
 
 	ff := &FloodFill{
 		flood:       flood,
 		cachedFlood: nil,
 		cells:       cells,
+		visited:     visited,
 
 		mo:              config.Mover,
 		pos:             config.StartPosition,
@@ -65,17 +69,19 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 		finishXTo:   finishXTo,
 		finishYTo:   finishYTo,
 	}
-
 	ff.dummyFloodFill()
-	ff.printFlood()
-
 	return ff
 }
 
-func (f *FloodFill) Solve() {
+func (f *FloodFill) Solve() ([][]bool, [][]ma.Wall) {
+	f.printFlood()
+	f.printWalls()
+
 	f.startToFinish()
-	time.Sleep(time.Second)
+	time.Sleep(100 * time.Millisecond)
 	f.finishToStart()
+
+	return f.visited, f.cells
 }
 
 func (f *FloodFill) startToFinish() {
@@ -101,13 +107,15 @@ func (f *FloodFill) finishToStart() {
 
 func (f *FloodFill) start() {
 	for {
-		if f.getFlood(f.pos) == 0 {
-			break
-		}
-
 		f.iteration++
 		log.Println("-------------")
 		log.Printf("iteration #%d", f.iteration)
+
+		f.visited[f.pos.x][f.pos.y] = true
+		if f.getFlood(f.pos) == 0 {
+			f.updateWalls()
+			break
+		}
 
 		f.updateWalls()
 		f.smartFloodFill()
