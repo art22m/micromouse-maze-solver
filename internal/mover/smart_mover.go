@@ -100,12 +100,17 @@ func (m *SmartMover) centering() {
 		log.Println("Робот уже отцентрован.")
 	}
 
+	m.updateAngle()
+}
+
+func (m *SmartMover) updateAngle() {
 	time.Sleep(angleUpdateTime)
 	state, _ := m.getSensor()
 	m.angle = int(state.Imu.Yaw)
 }
 
 func (m *SmartMover) Forward(cell int) {
+	m.updateAngle()
 	if m.isNotAimedAtCenter() {
 		m.centering()
 	}
@@ -114,9 +119,7 @@ func (m *SmartMover) Forward(cell int) {
 		time.Sleep(frontUpdateTime)
 		dist := m.calcFrontDistance()
 		m.move("forward", dist)
-		time.Sleep(angleUpdateTime)
-		state, _ := m.getSensor()
-		m.angle = int(state.Imu.Yaw)
+		m.updateAngle()
 		_, angle := m.closestDirectionAndAngle()
 		if angle >= 2 {
 			m.RotateRight(angle * 2)
@@ -175,9 +178,7 @@ func (m *SmartMover) RotateLeft(degrees int) {
 }
 
 func (m *SmartMover) Left() {
-	time.Sleep(angleUpdateTime)
-	state, _ := m.getSensor()
-	m.angle = int(state.Imu.Yaw)
+	m.updateAngle()
 
 	_, angleDiff := m.closestDirectionAndAngle()
 
@@ -191,9 +192,7 @@ func (m *SmartMover) RotateRight(degrees int) {
 	}
 }
 func (m *SmartMover) Right() {
-	time.Sleep(angleUpdateTime)
-	state, _ := m.getSensor()
-	m.angle = int(state.Imu.Yaw)
+	m.updateAngle()
 
 	_, angleDiff := m.closestDirectionAndAngle()
 	m.RotateRight(90 + angleDiff)
