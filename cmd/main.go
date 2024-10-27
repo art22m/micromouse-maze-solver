@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	backward := flag.Bool("fw", false, "")
+	backward := flag.Bool("bw", false, "")
 	sip := flag.String("sip", sensorsIP, "")
 	mip := flag.String("bip", motorsIP, "")
 	id := flag.String("id", robotID, "")

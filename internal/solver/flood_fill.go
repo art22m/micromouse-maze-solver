@@ -33,6 +33,8 @@ type FloodFill struct {
 }
 
 func NewFloodFill(config FloodFillConfig) *FloodFill {
+	log.SetPrefix("flood-fill: ")
+
 	flood := make([][]int, height)
 	cells := make([][]ma.Wall, height)
 	for i := 0; i < height; i++ {
@@ -66,7 +68,8 @@ func (f *FloodFill) Solve() {
 		}
 
 		it++
-		log.Printf("\niteration #%d", it)
+		log.Println()
+		log.Printf("iteration #%d", it)
 
 		f.updateWalls()
 		f.floodFill()
