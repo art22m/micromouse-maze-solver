@@ -162,7 +162,7 @@ public class Runner : MonoBehaviour
         SensorReading reading = mouseController.mouse.GetComponent<Mouse>().readSensors();
 
         resp.imu = new Imu();
-        resp.imu.yaw = (reading.yaw % 360 + 360) % 360;
+        resp.imu.yaw = (360 - ((reading.yaw % 360 + 360) % 360)) % 360;
         resp.laser = new Laser();
         resp.laser._1 = reading.backward;
         resp.laser._2 = reading.left;
