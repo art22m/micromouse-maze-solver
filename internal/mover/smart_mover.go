@@ -195,7 +195,7 @@ func (m *SmartMover) Right() {
 	m.updateAngle()
 
 	_, angleDiff := m.closestDirectionAndAngle()
-	m.RotateRight(90 + angleDiff)
+	m.RotateRight(90 - angleDiff)
 }
 
 func (m *SmartMover) Rotate() {
