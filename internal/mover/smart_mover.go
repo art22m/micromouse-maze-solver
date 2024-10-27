@@ -119,13 +119,13 @@ func (m *SmartMover) Forward(cell int) {
 		time.Sleep(frontUpdateTime)
 		dist := m.calcFrontDistance()
 		m.move("forward", dist)
-		m.updateAngle()
-		_, angle := m.closestDirectionAndAngle()
-		if angle >= 2 {
-			m.RotateRight(angle * 2)
-		} else if angle <= -2 {
-			m.RotateLeft(int(math.Abs(float64(angle)) * 2))
-		}
+		//m.updateAngle()
+		//_, angle := m.closestDirectionAndAngle()
+		//if angle >= 2 {
+		//	m.RotateRight(angle * 2)
+		//} else if angle <= -2 {
+		//	m.RotateLeft(int(math.Abs(float64(angle)) * 2))
+		//}
 	}
 }
 
@@ -153,9 +153,9 @@ func (m *SmartMover) Backward(cell int) {
 		m.angle = int(state.Imu.Yaw)
 		_, angle := m.closestDirectionAndAngle()
 		if angle >= 2 {
-			m.RotateRight(angle * 2)
+			m.RotateLeft(angle)
 		} else if angle <= -2 {
-			m.RotateLeft(int(math.Abs(float64(angle)) * 2))
+			m.RotateRight(int(math.Abs(float64(angle))))
 		}
 	}
 }
