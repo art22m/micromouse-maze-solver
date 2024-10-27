@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+
 	"jackson/internal/maze"
 	mo "jackson/internal/mover"
 	"jackson/internal/solver"
@@ -13,12 +16,18 @@ const (
 )
 
 func main() {
-	mover := mo.NewDummyMover(sensorsIP, motorsIP, robotID)
+	backward := flag.Bool("fw", false, "")
+	sip := flag.String("sip", sensorsIP, "")
+	mip := flag.String("bip", motorsIP, "")
+	id := flag.String("id", robotID, "")
+	flag.Parse()
+	fmt.Println(*sip, *mip, *id)
 
+	mover := mo.NewDummyMover(*sip, *mip, *id)
 	config := solver.FloodFillConfig{
 		StartDirection:  maze.Up,
 		StartPosition:   solver.NewPosition(0, 0),
-		MoveForwardOnly: false,
+		MoveForwardOnly: !*backward,
 		Mover:           mover,
 	}
 
