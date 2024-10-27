@@ -3,11 +3,11 @@ package solver
 import (
 	"fmt"
 	"log"
-	"math"
 	"sort"
 
 	ma "jackson/internal/maze"
 	mo "jackson/internal/mover"
+	"jackson/internal/queue"
 	"jackson/internal/stack"
 )
 
@@ -26,6 +26,10 @@ type FloodFill struct {
 
 	moveForwardOnly bool
 
+	// may change
+	finishXFrom, finishXTo int
+	finishYFrom, finishYTo int
+
 	dir ma.Direction
 	pos Position
 
@@ -42,21 +46,24 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 		cells[i] = make([]ma.Wall, width)
 	}
 
-	for i := 0; i < height; i++ {
-		for j := 0; j < width; j++ {
-			flood[i][j] = abs(i-getNearest(i, finishXFrom, finishXTo)) + abs(j-getNearest(j, finishYFrom, finishYTo))
-			cells[i][j] = 0
-		}
-	}
-
-	return &FloodFill{
+	ff := &FloodFill{
 		flood:           flood,
 		cells:           cells,
 		mo:              config.Mover,
 		pos:             config.StartPosition,
 		dir:             config.StartDirection,
 		moveForwardOnly: config.MoveForwardOnly,
+
+		finishXFrom: finishXFrom,
+		finishXTo:   finishXTo,
+
+		finishYFrom: finishYFrom,
+		finishYTo:   finishYTo,
 	}
+
+	ff.dummyFloodFill()
+	ff.printFlood()
+	return ff
 }
 
 func (f *FloodFill) Solve() {
@@ -72,7 +79,7 @@ func (f *FloodFill) Solve() {
 		log.Printf("iteration #%d", it)
 
 		f.updateWalls()
-		f.floodFill()
+		f.smartFloodFill()
 		f.move()
 	}
 }
@@ -194,7 +201,34 @@ func (f *FloodFill) updateNeighboursWallsIfNeeded(pos Position, wall ma.Wall) {
 	}
 }
 
-func (f *FloodFill) floodFill() {
+func (f *FloodFill) dummyFloodFill() {
+	visited := make(map[Position]struct{}, height*width)
+	q := queue.Queue[Position]{}
+
+	for x := finishXFrom; x <= finishXTo; x++ {
+		for y := finishYFrom; y <= finishYTo; y++ {
+			pos := Position{x: x, y: y}
+			f.setFlood(pos, 0)
+			visited[pos] = struct{}{}
+			q.Push(pos)
+		}
+	}
+
+	for !q.Empty() {
+		frontPos := q.Pop()
+		nb := f.getOpenNeighboursNotFinish(frontPos)
+		for _, n := range nb {
+			if _, ok := visited[n]; ok {
+				continue
+			}
+			visited[n] = struct{}{}
+			f.setFlood(n, f.getFlood(frontPos)+1)
+			q.Push(n)
+		}
+	}
+}
+
+func (f *FloodFill) smartFloodFill() {
 	st := stack.Stack[Position]{}
 	st.Push(f.pos)
 	for !st.Empty() {
@@ -222,53 +256,6 @@ func (f *FloodFill) getFlood(pos Position) int {
 
 func (f *FloodFill) getCell(pos Position) ma.Wall {
 	return f.cells[pos.x][pos.y]
-}
-
-func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
-	mn := math.MaxInt
-	for _, n := range getNeighboursNotFinish(pos) {
-		if !f.isOpen(pos, n) {
-			continue
-		}
-		if f.getFlood(n) < mn {
-			mn = f.getFlood(n)
-			res = n
-		}
-	}
-	if mn == math.MaxInt {
-		panic("look like no neighbours")
-	}
-	return res
-}
-
-func (f *FloodFill) getOpenNeighboursNotFinish(pos Position) (res []Position) {
-	for _, n := range getNeighboursNotFinish(pos) {
-		if !f.isOpen(pos, n) {
-			continue
-		}
-		res = append(res, n)
-	}
-	return res
-}
-
-func (f *FloodFill) isOpen(from Position, to Position) bool {
-	x1, y1 := from.x, from.y
-	x2, y2 := to.x, to.y
-	if abs(x1-x2)+abs(y1-y2) == 0 || abs(x1-x2)+abs(y1-y2) > 1 {
-		panic("diagonal move or not neighbour")
-	}
-	switch {
-	case x1 < x2:
-		return f.getCell(from)&ma.U == 0
-	case x1 > x2:
-		return f.getCell(from)&ma.D == 0
-	case y1 > y2:
-		return f.getCell(from)&ma.L == 0
-	case y1 < y2:
-		return f.getCell(from)&ma.R == 0
-	default:
-		panic("wtf??")
-	}
 }
 
 func (f *FloodFill) printFlood() {

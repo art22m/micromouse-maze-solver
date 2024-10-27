@@ -11,7 +11,7 @@ import (
 
 const (
 	sensorsIP = "localhost:8080"
-	motorsIP  = "localhost:8080"
+	motorsIP  = sensorsIP
 	robotID   = "1"
 )
 
