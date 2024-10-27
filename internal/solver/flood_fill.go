@@ -54,7 +54,7 @@ func (f *FloodFill) Solve() {
 		}
 
 		it++
-		log.Printf("iteration #%d", it)
+		log.Printf("\niteration #%d", it)
 
 		f.updateWalls()
 		f.floodFill()
@@ -84,15 +84,12 @@ func (f *FloodFill) move() {
 func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction, bool) {
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
-		fmt.Println("no rotate")
 		return f.dir, true
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
 		if moveForwardOnly {
 			f.mo.Rotate()
-			fmt.Println("rotate 180")
 			return nextPos.Direction, true
 		}
-		fmt.Println("rotate 180 (no rotate)")
 		return f.dir, false
 
 	default:

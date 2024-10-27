@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"jackson/internal/maze"
@@ -95,7 +96,7 @@ func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 		}
 	}
 
-	fmt.Println("wall", w)
+	log.Println("mover: wall", w)
 
 	return Cell{
 		Wall: w,

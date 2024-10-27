@@ -85,7 +85,10 @@ func (w Wall) String() string {
 	if w.Contains(L) {
 		sb.WriteByte('L')
 	}
-	return "x"
+	if sb.Len() == 0 {
+		return "x"
+	}
+	return sb.String()
 }
 
 func abs(v int) int {
