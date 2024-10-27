@@ -249,23 +249,23 @@ func (f *FloodFill) isOpen(from Position, to Position) bool {
 }
 
 func (f *FloodFill) printFlood() {
-	fmt.Println("----flood-----")
+	log.Println("----flood-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			fmt.Print(f.flood[i][j], " ")
+			fmt.Printf("%-3v", f.flood[i][j])
 		}
 		fmt.Println()
 	}
-	fmt.Println("---------")
+	log.Println("-------------")
 }
 
 func (f *FloodFill) printWalls() {
-	fmt.Println("----walls-----")
+	log.Println("----walls-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			fmt.Print(f.cells[i][j], " ")
+			fmt.Printf("%-3v", f.cells[i][j])
 		}
 		fmt.Println()
 	}
-	fmt.Println("---------")
+	log.Println("-------------")
 }
