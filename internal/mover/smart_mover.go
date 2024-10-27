@@ -16,14 +16,17 @@ type SmartMover struct {
 	left       int
 	right      int
 
+	targetAimAngle int
+	state          *CellResp
+
 	baseMover
 }
 
 const (
-	angleUpdateTime = 500 * time.Millisecond
-	frontUpdateTime = 500 * time.Millisecond
-	backUpdateTime  = 500 * time.Millisecond
-	allUpdateTime   = 1 * time.Second
+	angleUpdateTime = 5 * time.Millisecond
+	frontUpdateTime = 5 * time.Millisecond
+	backUpdateTime  = 5 * time.Millisecond
+	allUpdateTime   = 5 * time.Millisecond
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
@@ -41,8 +44,8 @@ func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 }
 
 func (m *SmartMover) Calibrate() {
-	state, _ := m.getSensor()
-	m.startAngle = int(state.Imu.Yaw)
+	m.state, _ = m.getSensor()
+	m.startAngle = int(m.state.Imu.Yaw)
 }
 
 const (
@@ -53,45 +56,45 @@ const (
 	Tolerance = 5 // допустимая погрешность
 )
 
-func (m *SmartMover) closestDirectionAndAngle() (string, int) {
-	directions := map[string]int{
-		"Front": Front,
-		"Right": Right,
-		"Down":  Down,
-		"Left":  Left,
+// вращает робота в сторону от стены если он слишком близко
+func (m *SmartMover) fixCenter() int {
+	if m.state.Laser.Left > 100 || m.state.Laser.Right > 100 {
+		// справа или слева нет стены
+		return 0
 	}
 
-	minDiff := 360.0
-	closest := ""
-	var angleDiff int
-
-	for dir, angle := range directions {
-		diff := m.angle - angle
-		if diff > 180 {
-			diff -= 360
-		} else if diff < -180 {
-			diff += 360
-		}
-
-		if math.Abs(float64(diff)) < minDiff {
-			minDiff = math.Abs(float64(diff))
-			closest = dir
-			angleDiff = diff
-		}
+	if m.state.Laser.Left < 20 {
+		return -5
+	} else if m.state.Laser.Right < 20 {
+		return 5
 	}
 
-	return closest, angleDiff
+	return 0
+}
+
+func (m *SmartMover) fixAngle() int {
+	diff := m.angle - m.targetAimAngle
+	if diff > 180 {
+		diff -= 360
+	} else if diff < -180 {
+		diff += 360
+	}
+
+	if math.Abs(float64(diff)) < 10 {
+		return diff + m.fixCenter()
+	}
+
+	return diff
 }
 
 func (m *SmartMover) isNotAimedAtCenter() bool {
-	_, angleDiff := m.closestDirectionAndAngle()
+	angleDiff := m.fixAngle()
 	return math.Abs(float64(angleDiff)) > Tolerance
 }
 
-// Метод для центрирования робота к ближайшей оси
+// Метод для центрирования робота к нужной оси
 func (m *SmartMover) centering() {
-	direction, angleDiff := m.closestDirectionAndAngle()
-	log.Printf("Closest Direction: %s, diff: %d", direction, angleDiff)
+	angleDiff := m.fixAngle()
 	if angleDiff > 0 {
 		m.RotateLeft(int(angleDiff))
 	} else if angleDiff < 0 {
@@ -105,8 +108,8 @@ func (m *SmartMover) centering() {
 
 func (m *SmartMover) updateAngle() {
 	time.Sleep(angleUpdateTime)
-	state, _ := m.getSensor()
-	m.angle = int(state.Imu.Yaw)
+	m.state, _ = m.getSensor()
+	m.angle = int(m.state.Imu.Yaw)
 }
 
 func (m *SmartMover) Forward(cell int) {
@@ -120,7 +123,7 @@ func (m *SmartMover) Forward(cell int) {
 		dist := m.calcFrontDistance()
 		m.move("forward", dist)
 		//m.updateAngle()
-		//_, angle := m.closestDirectionAndAngle()
+		//_, angle := m.fixAngle()
 		//if angle >= 2 {
 		//	m.RotateRight(angle * 2)
 		//} else if angle <= -2 {
@@ -131,12 +134,12 @@ func (m *SmartMover) Forward(cell int) {
 
 func (m *SmartMover) calcFrontDistance() int {
 	frontDiff := 49.0
-	state, _ := m.getSensor()
-	if state.Laser.Front > 270 {
+	m.state, _ = m.getSensor()
+	if m.state.Laser.Front > 270 {
 		return 180
 	}
-	_, angle := m.closestDirectionAndAngle()
-	return int(math.Round(float64(state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
+	angle := m.fixAngle()
+	return int(math.Round(float64(m.state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
 }
 
 func (m *SmartMover) Backward(cell int) {
@@ -149,9 +152,9 @@ func (m *SmartMover) Backward(cell int) {
 		dist := m.calcBackDistance()
 		m.move("backward", dist)
 		time.Sleep(angleUpdateTime)
-		state, _ := m.getSensor()
-		m.angle = int(state.Imu.Yaw)
-		_, angle := m.closestDirectionAndAngle()
+		m.state, _ = m.getSensor()
+		m.angle = int(m.state.Imu.Yaw)
+		angle := m.fixAngle()
 		if angle >= 2 {
 			m.RotateLeft(angle)
 		} else if angle <= -2 {
@@ -162,12 +165,12 @@ func (m *SmartMover) Backward(cell int) {
 
 func (m *SmartMover) calcBackDistance() int {
 	backDiff := 49.0
-	state, _ := m.getSensor()
-	if state.Laser.Back > 270 {
+	m.state, _ = m.getSensor()
+	if m.state.Laser.Back > 270 {
 		return 180
 	}
-	_, angle := m.closestDirectionAndAngle()
-	return int(math.Round(float64(state.Laser.Back) - backDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
+	angle := m.fixAngle()
+	return int(math.Round(float64(m.state.Laser.Back) - backDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
 }
 
 func (m *SmartMover) RotateLeft(degrees int) {
@@ -180,9 +183,9 @@ func (m *SmartMover) RotateLeft(degrees int) {
 func (m *SmartMover) Left() {
 	m.updateAngle()
 
-	_, angleDiff := m.closestDirectionAndAngle()
-
+	angleDiff := m.fixAngle()
 	m.RotateLeft(90 + angleDiff)
+	m.targetAimAngle = (m.targetAimAngle + 270) % 360
 }
 
 func (m *SmartMover) RotateRight(degrees int) {
@@ -194,19 +197,25 @@ func (m *SmartMover) RotateRight(degrees int) {
 func (m *SmartMover) Right() {
 	m.updateAngle()
 
-	_, angleDiff := m.closestDirectionAndAngle()
+	angleDiff := m.fixAngle()
 	m.RotateRight(90 - angleDiff)
+	m.targetAimAngle = (m.targetAimAngle + 90) % 360
 }
 
 func (m *SmartMover) Rotate() {
-	m.RotateRight(180)
+	m.updateAngle()
+
+	angleDiff := m.fixAngle()
+	m.RotateRight(180 - angleDiff)
+	m.targetAimAngle = (m.targetAimAngle + 180) % 360
 }
 
 func (m *SmartMover) CellState(d maze.Direction) Cell {
 	time.Sleep(allUpdateTime)
-	resp, err := m.getSensor()
+	var err error
+	m.state, err = m.getSensor()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return resp.ToCell(d)
+	return m.state.ToCell(d)
 }

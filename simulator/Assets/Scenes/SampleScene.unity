@@ -439,8 +439,8 @@ MonoBehaviour:
   mousePrefab: {fileID: 9154829941279353625, guid: e07051d58e4164233a23274f539b509d, type: 3}
   mouseWidth: 88
   mouseHeight: 70
-  mouseSpeed: 30
-  mouseRotationSpeed: 30
+  mouseSpeed: 100
+  mouseRotationSpeed: 100
   trail: {fileID: 5615767479257713346, guid: aa4e9536153754afdb966b80c9f36afa, type: 3}
   trailParent: {fileID: 1484346503}
   mouse: {fileID: 0}
