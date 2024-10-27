@@ -159,15 +159,17 @@ public class Runner : MonoBehaviour
     private SensorResponse OnSensorRequest() {
         SensorResponse resp = new SensorResponse();
 
+        SensorReading reading = mouseController.mouse.GetComponent<Mouse>().readSensors();
+
         resp.imu = new Imu();
-        resp.imu.yaw = (mouseController.rb.rotation % 360 + 360) % 360;
+        resp.imu.yaw = (reading.yaw % 360 + 360) % 360;
         resp.laser = new Laser();
-        resp.laser._1 = mouseController.mouse.GetComponent<Mouse>().backward.distance;
-        resp.laser._2 = mouseController.mouse.GetComponent<Mouse>().left.distance;
-        resp.laser._3 = mouseController.mouse.GetComponent<Mouse>().diagonalRight.distance;
-        resp.laser._4 = mouseController.mouse.GetComponent<Mouse>().forward.distance;
-        resp.laser._5 = mouseController.mouse.GetComponent<Mouse>().right.distance;
-        resp.laser._6 = mouseController.mouse.GetComponent<Mouse>().left.distance;
+        resp.laser._1 = reading.backward;
+        resp.laser._2 = reading.left;
+        resp.laser._3 = reading.rightDiagonal;
+        resp.laser._4 = reading.forward;
+        resp.laser._5 = reading.right;
+        resp.laser._6 = reading.left;
 
         return resp;
     }

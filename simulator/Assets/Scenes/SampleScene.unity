@@ -439,11 +439,12 @@ MonoBehaviour:
   mousePrefab: {fileID: 9154829941279353625, guid: e07051d58e4164233a23274f539b509d, type: 3}
   mouseWidth: 88
   mouseHeight: 70
-  mouseSpeed: 100
-  mouseRotationSpeed: 100
+  mouseSpeed: 10
+  mouseRotationSpeed: 10
   trail: {fileID: 5615767479257713346, guid: aa4e9536153754afdb966b80c9f36afa, type: 3}
   trailParent: {fileID: 1484346503}
   mouse: {fileID: 0}
+  mouseScript: {fileID: 0}
   rb: {fileID: 0}
 --- !u!1 &1484346502
 GameObject:
@@ -523,7 +524,7 @@ MonoBehaviour:
   square: {fileID: 6160892510778916823, guid: 3ddf77a182d6a43a5a5025ed1fb1e326, type: 3}
   sceneCamera: {fileID: 519420031}
   seed: 6
-  loops: 5
+  loops: 0
   removeDanglingPoles: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
