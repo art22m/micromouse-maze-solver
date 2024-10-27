@@ -28,21 +28,21 @@ type Cell struct {
 
 type CellResp struct {
 	Laser struct {
-		Back    float64 `json:"1"`
-		Left    float64 `json:"2"`
-		Right45 float64 `json:"3"`
-		Front   float64 `json:"4"`
-		Right   float64 `json:"5"`
-		Left45  float64 `json:"6"`
+		Back    int `json:"1"`
+		Left    int `json:"2"`
+		Right45 int `json:"3"`
+		Front   int `json:"4"`
+		Right   int `json:"5"`
+		Left45  int `json:"6"`
 	} `json:"laser"`
 	Imu struct {
-		Roll  float64 `json:"roll"`
-		Pitch float64 `json:"pitch"`
-		Yaw   float64 `json:"yaw"`
+		Roll  int `json:"roll"`
+		Pitch int `json:"pitch"`
+		Yaw   int `json:"yaw"`
 	} `json:"imu"`
 }
 
-const wallThreshold float64 = 100
+const wallThreshold int = 100
 
 func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 	var w maze.Wall

@@ -1,8 +1,9 @@
 package mover
 
 import (
-	"fmt"
+	"log"
 	"math"
+	"time"
 
 	"jackson/internal/maze"
 )
@@ -16,6 +17,12 @@ type SmartMover struct {
 
 	baseMover
 }
+
+const (
+	angleUpdateTime = 1
+	frontUpdateTime = 1
+	backUpdateTime  = 1
+)
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 	return &SmartMover{
@@ -76,28 +83,78 @@ func (m *SmartMover) centering() {
 	_, angleDiff := m.closestDirectionAndAngle()
 
 	if angleDiff > 0 {
-		m.RotateRight(int(angleDiff))
+		m.RotateLeft(int(angleDiff))
 	} else if angleDiff < 0 {
 		m.RotateRight(int(-angleDiff))
 	} else {
-		fmt.Println("Робот уже отцентрован.")
+		log.Println("Робот уже отцентрован.")
 	}
+
+	time.Sleep(angleUpdateTime)
+	state, _ := m.getSensor()
+	m.angle = state.Imu.Yaw
 }
 
 func (m *SmartMover) Forward(cell int) {
 	if m.isNotAimedAtCenter() {
 		m.centering()
 	}
-	m.move("forward", cell*180)
-	// transform cell parameter to mm
-	// send command to mouse
-	// check position and angle
-	// save angle
+
+	for i := 0; i < cell; i++ {
+		time.Sleep(frontUpdateTime)
+		dist := m.calcFrontDistance()
+		m.move("forward", dist)
+		time.Sleep(angleUpdateTime)
+		state, _ := m.getSensor()
+		m.angle = state.Imu.Yaw
+		_, angle := m.closestDirectionAndAngle()
+		if angle >= 2 {
+			m.RotateRight(angle * 2)
+		} else if angle <= -2 {
+			m.RotateLeft(int(math.Abs(float64(angle)) * 2))
+		}
+	}
+}
+
+func (m *SmartMover) calcFrontDistance() int {
+	frontDiff := 49.0
+	state, _ := m.getSensor()
+	if state.Laser.Front > 270 {
+		return 180
+	}
+	_, angle := m.closestDirectionAndAngle()
+	return int(math.Round(float64(state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
 }
 
 func (m *SmartMover) Backward(cell int) {
-	// same as forward
-	m.move("backward", cell*180)
+	if m.isNotAimedAtCenter() {
+		m.centering()
+	}
+
+	for i := 0; i < cell; i++ {
+		time.Sleep(backUpdateTime)
+		dist := m.calcBackDistance()
+		m.move("backward", dist)
+		time.Sleep(angleUpdateTime)
+		state, _ := m.getSensor()
+		m.angle = state.Imu.Yaw
+		_, angle := m.closestDirectionAndAngle()
+		if angle >= 2 {
+			m.RotateRight(angle * 2)
+		} else if angle <= -2 {
+			m.RotateLeft(int(math.Abs(float64(angle)) * 2))
+		}
+	}
+}
+
+func (m *SmartMover) calcBackDistance() int {
+	backDiff := 49.0
+	state, _ := m.getSensor()
+	if state.Laser.Back > 270 {
+		return 180
+	}
+	_, angle := m.closestDirectionAndAngle()
+	return int(math.Round(float64(state.Laser.Back) - backDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
 }
 
 func (m *SmartMover) RotateLeft(degrees int) {
@@ -108,7 +165,11 @@ func (m *SmartMover) RotateLeft(degrees int) {
 }
 
 func (m *SmartMover) Left() {
-	// get current angle from memory
+	time.Sleep(angleUpdateTime)
+	state, _ := m.getSensor()
+	m.angle = state.Imu.Yaw
+
+	direction, angleDiff = m.getSensor()
 	m.RotateLeft(90)
 }
 
