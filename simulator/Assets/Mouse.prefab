@@ -625,7 +625,7 @@ MonoBehaviour:
   leftAbsErrorMean: 0
   leftAbsErrorStd: 0
   yawAbsErrorStd: 1
-  northYawReading: 0
+  northYawReading: 1
   forwardErrorSeed: 1
   forwardAbsErrorSeed: 2
   backwardErrorSeed: 3
@@ -635,8 +635,8 @@ MonoBehaviour:
   leftErrorSeed: 7
   leftAbsErrorSeed: 8
   yawAbsErrorSeed: 9
-  laserUpdateIntervalSeconds: 0.1
-  yawUpdateIntervalSeconds: 0.1
+  laserUpdateIntervalSeconds: 0
+  yawUpdateIntervalSeconds: 0
   spreadSensorsUpdate: 1
   forward: {fileID: 3177784349784974923}
   backward: {fileID: 5630817239422893817}
