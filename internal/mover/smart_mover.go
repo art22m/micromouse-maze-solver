@@ -4,8 +4,6 @@ import (
 	"log"
 	"math"
 	"time"
-
-	"jackson/internal/maze"
 )
 
 type SmartMover struct {
@@ -22,6 +20,7 @@ const (
 	angleUpdateTime = 1
 	frontUpdateTime = 1
 	backUpdateTime  = 1
+	allUpdateTime   = 2
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
@@ -169,8 +168,9 @@ func (m *SmartMover) Left() {
 	state, _ := m.getSensor()
 	m.angle = state.Imu.Yaw
 
-	direction, angleDiff = m.getSensor()
-	m.RotateLeft(90)
+	_, angleDiff := m.closestDirectionAndAngle()
+
+	m.RotateLeft(90 + angleDiff)
 }
 
 func (m *SmartMover) RotateRight(degrees int) {
@@ -180,12 +180,13 @@ func (m *SmartMover) RotateRight(degrees int) {
 	}
 }
 func (m *SmartMover) Right() {
-	m.RotateRight(90)
-}
+	time.Sleep(angleUpdateTime)
+	state, _ := m.getSensor()
+	m.angle = state.Imu.Yaw
 
-func (m *SmartMover) CellState(d maze.Direction) Cell {
-	//resp, err := m.getSensor()
-	return Cell{}
+	_, angleDiff := m.closestDirectionAndAngle()
+
+	m.RotateLeft(90 + angleDiff)
 }
 
 func (m *SmartMover) Rotate() {
