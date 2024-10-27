@@ -90,8 +90,8 @@ func (m *SmartMover) isNotAimedAtCenter() bool {
 
 // Метод для центрирования робота к ближайшей оси
 func (m *SmartMover) centering() {
-	_, angleDiff := m.closestDirectionAndAngle()
-
+	direction, angleDiff := m.closestDirectionAndAngle()
+	log.Printf("Closest Direction: %s, diff: %s", direction, angleDiff)
 	if angleDiff > 0 {
 		m.RotateLeft(int(angleDiff))
 	} else if angleDiff < 0 {
