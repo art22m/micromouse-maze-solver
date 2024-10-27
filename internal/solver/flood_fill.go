@@ -29,9 +29,8 @@ type FloodFill struct {
 
 	moveForwardOnly bool
 
-	// may change
-	finishXFrom, finishXTo int
-	finishYFrom, finishYTo int
+	finishFrom Position
+	finishTo   Position
 
 	dir ma.Direction
 	pos Position
@@ -64,10 +63,8 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 		dir:             config.StartDirection,
 		moveForwardOnly: config.MoveForwardOnly,
 
-		finishXFrom: finishXFrom,
-		finishYFrom: finishYFrom,
-		finishXTo:   finishXTo,
-		finishYTo:   finishYTo,
+		finishFrom: Position{finishXFrom, finishYFrom},
+		finishTo:   Position{finishXTo, finishYTo},
 	}
 	ff.dummyFloodFill()
 	return ff
@@ -98,8 +95,8 @@ func (f *FloodFill) finishToStart() {
 		f.flood[i] = make([]int, width)
 	}
 
-	f.finishXFrom, f.finishXTo = 0, 0
-	f.finishYFrom, f.finishYTo = 0, 0
+	f.finishFrom = Position{0, 0}
+	f.finishTo = Position{0, 0}
 
 	f.dummyFloodFill()
 	f.start()
@@ -193,7 +190,7 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction,
 
 func (f *FloodFill) getNextPosition() PositionWithDirection {
 	res := make([]PositionWithDirection, 0, 4)
-	for _, n := range getNeighboursWithDirection(f.pos) {
+	for _, n := range f.getNeighboursWithDirection(f.pos) {
 		if !f.isOpen(f.pos, n.Position) {
 			continue
 		}
@@ -222,7 +219,7 @@ func (f *FloodFill) updateWalls() {
 }
 
 func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
-	if !validPosition(pos) {
+	if !f.validPosition(pos) {
 		return
 	}
 	f.cells[pos.x][pos.y] |= wall
@@ -247,8 +244,8 @@ func (f *FloodFill) dummyFloodFill() {
 	visited := make(map[Position]struct{}, height*width)
 	q := queue.Queue[Position]{}
 
-	for x := f.finishXFrom; x <= f.finishXTo; x++ {
-		for y := f.finishYFrom; y <= f.finishYTo; y++ {
+	for x := f.finishFrom.x; x <= f.finishTo.x; x++ {
+		for y := f.finishFrom.y; y <= f.finishTo.y; y++ {
 			pos := Position{x: x, y: y}
 			f.setFlood(pos, 0)
 			visited[pos] = struct{}{}
@@ -258,7 +255,7 @@ func (f *FloodFill) dummyFloodFill() {
 
 	for !q.Empty() {
 		frontPos := q.Pop()
-		nb := f.getOpenNeighboursNotFinish(frontPos)
+		nb := f.getOpenNeighbours(frontPos)
 		for _, n := range nb {
 			if _, ok := visited[n]; ok {
 				continue
@@ -271,18 +268,25 @@ func (f *FloodFill) dummyFloodFill() {
 }
 
 func (f *FloodFill) smartFloodFill() {
+	f.printFlood()
 	st := stack.Stack[Position]{}
 	st.Push(f.pos)
 	for !st.Empty() {
 		topPos := st.Pop()
-		minPos := f.getMinOpenNeighbourNotFinish(topPos)
+		minPos := f.getOpenNeighbourWithSmallestFlood(topPos)
+
+		fmt.Println(topPos.String())
+		fmt.Println(minPos.String())
 
 		if f.getFlood(topPos)-1 == f.getFlood(minPos) {
 			continue
 		}
 
 		f.setFlood(topPos, f.getFlood(minPos)+1)
-		for _, n := range f.getOpenNeighboursNotFinish(topPos) {
+		for _, n := range f.getOpenNeighbours(topPos) {
+			if f.isFinish(n) {
+				continue
+			}
 			st.Push(n)
 		}
 	}

@@ -1,7 +1,7 @@
 package solver
 
 import (
-	"math"
+	"sort"
 
 	ma "jackson/internal/maze"
 )
@@ -13,79 +13,60 @@ func abs(v int) int {
 	return -v
 }
 
-func getNearest(x, from, to int) int {
-	switch {
-	case x < from:
-		return from
-	case to < x:
-		return to
-	default:
-		return x
-	}
+func (f *FloodFill) validPosition(pos Position) bool {
+	return 0 <= pos.x && pos.x < height && 0 <= pos.y && pos.y < width
 }
 
-func getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
-	if validPosition(pos.Shift(ma.Down)) {
+func (f *FloodFill) isFinish(pos Position) bool {
+	return f.finishFrom.x <= pos.x && pos.x <= f.finishTo.x &&
+		f.finishFrom.y <= pos.y && pos.y <= f.finishTo.y
+}
+
+func (f *FloodFill) getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
+	if f.validPosition(pos.Shift(ma.Down)) {
 		res = append(res, PositionWithDirection{pos.Shift(ma.Down), ma.Down})
 	}
-	if validPosition(pos.Shift(ma.Up)) {
+	if f.validPosition(pos.Shift(ma.Up)) {
 		res = append(res, PositionWithDirection{pos.Shift(ma.Up), ma.Up})
 	}
-	if validPosition(pos.Shift(ma.Left)) {
+	if f.validPosition(pos.Shift(ma.Left)) {
 		res = append(res, PositionWithDirection{pos.Shift(ma.Left), ma.Left})
 	}
-	if validPosition(pos.Shift(ma.Right)) {
+	if f.validPosition(pos.Shift(ma.Right)) {
 		res = append(res, PositionWithDirection{pos.Shift(ma.Right), ma.Right})
 	}
 	return res
 }
 
-func (f *FloodFill) getNeighboursNotFinish(pos Position) (res []Position) {
-	if f.checkPositionNotFinish(pos.Shift(ma.Down)) {
+func (f *FloodFill) getNeighbours(pos Position) (res []Position) {
+	if f.validPosition(pos.Shift(ma.Down)) {
 		res = append(res, pos.Shift(ma.Down))
 	}
-	if f.checkPositionNotFinish(pos.Shift(ma.Up)) {
+	if f.validPosition(pos.Shift(ma.Up)) {
 		res = append(res, pos.Shift(ma.Up))
 	}
-	if f.checkPositionNotFinish(pos.Shift(ma.Left)) {
+	if f.validPosition(pos.Shift(ma.Left)) {
 		res = append(res, pos.Shift(ma.Left))
 	}
-	if f.checkPositionNotFinish(pos.Shift(ma.Right)) {
+	if f.validPosition(pos.Shift(ma.Right)) {
 		res = append(res, pos.Shift(ma.Right))
 	}
 	return res
 }
 
-func validPosition(pos Position) bool {
-	return 0 <= pos.x && pos.x < height && 0 <= pos.y && pos.y < width
+func (f *FloodFill) getOpenNeighbourWithSmallestFlood(pos Position) Position {
+	ns := f.getOpenNeighbours(pos)
+	if len(ns) == 0 {
+		panic("no open neighbours")
+	}
+	sort.Slice(ns, func(i, j int) bool {
+		return f.getFlood(ns[i]) < f.getFlood(ns[j])
+	})
+	return ns[0]
 }
 
-func (f *FloodFill) checkPositionNotFinish(pos Position) bool {
-	if f.finishXFrom <= pos.x && pos.x <= f.finishXTo && f.finishYFrom <= pos.y && pos.y <= f.finishYTo {
-		return false
-	}
-	return validPosition(pos)
-}
-
-func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
-	mn := math.MaxInt
-	for _, n := range f.getNeighboursNotFinish(pos) {
-		if !f.isOpen(pos, n) {
-			continue
-		}
-		if f.getFlood(n) < mn {
-			mn = f.getFlood(n)
-			res = n
-		}
-	}
-	if mn == math.MaxInt {
-		panic("look like no neighbours")
-	}
-	return res
-}
-
-func (f *FloodFill) getOpenNeighboursNotFinish(pos Position) (res []Position) {
-	for _, n := range f.getNeighboursNotFinish(pos) {
+func (f *FloodFill) getOpenNeighbours(pos Position) (res []Position) {
+	for _, n := range f.getNeighbours(pos) {
 		if !f.isOpen(pos, n) {
 			continue
 		}
