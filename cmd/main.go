@@ -14,14 +14,14 @@ const (
 
 func main() {
 	mover := mo.NewDummyMover(sensorsIP, motorsIP, robotID)
-	startPosition := solver.NewPosition(0, 0)
-	baseDirection := maze.Up
 
-	ff := solver.NewFloodFill(
-		baseDirection,
-		startPosition,
-		mover,
-	)
+	config := solver.FloodFillConfig{
+		StartDirection:  maze.Up,
+		StartPosition:   solver.NewPosition(0, 0),
+		MoveForwardOnly: false,
+		Mover:           mover,
+	}
 
+	ff := solver.NewFloodFill(config)
 	ff.Solve()
 }

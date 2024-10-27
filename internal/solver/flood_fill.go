@@ -11,9 +11,20 @@ import (
 	"jackson/internal/stack"
 )
 
+type FloodFillConfig struct {
+	StartDirection ma.Direction
+	StartPosition  Position
+
+	MoveForwardOnly bool
+
+	Mover mo.Mover
+}
+
 type FloodFill struct {
 	flood [][]int
 	cells [][]ma.Wall
+
+	moveForwardOnly bool
 
 	dir ma.Direction
 	pos Position
@@ -21,7 +32,7 @@ type FloodFill struct {
 	mo mo.Mover
 }
 
-func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
+func NewFloodFill(config FloodFillConfig) *FloodFill {
 	flood := make([][]int, height)
 	cells := make([][]ma.Wall, height)
 	for i := 0; i < height; i++ {
@@ -37,11 +48,12 @@ func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
 	}
 
 	return &FloodFill{
-		flood: flood,
-		cells: cells,
-		mo:    mover,
-		pos:   pos,
-		dir:   dir,
+		flood:           flood,
+		cells:           cells,
+		mo:              config.Mover,
+		pos:             config.StartPosition,
+		dir:             config.StartDirection,
+		moveForwardOnly: config.MoveForwardOnly,
 	}
 }
 
@@ -86,7 +98,7 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction,
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		return f.dir, true
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
-		if moveForwardOnly {
+		if f.moveForwardOnly {
 			f.mo.Rotate()
 			return nextPos.Direction, true
 		}
