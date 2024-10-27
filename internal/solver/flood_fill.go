@@ -66,24 +66,35 @@ func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
 	log.Printf("next pos=%v\n", nextPos.y)
 
-	newDir := f.rotateIfNeeded(nextPos)
+	newDir, moveForward := f.rotateIfNeeded(nextPos)
 	log.Printf("prev dir=%v, new dir=%v\n", f.dir.String(), newDir.String())
-	f.dir = newDir
 
-	f.mo.Forward(1)
+	if moveForward {
+		f.mo.Forward(1)
+	} else {
+		f.mo.Backward(1)
+	}
+
 	log.Printf("prev pos=%v, new pos=%v\n", f.pos.String(), nextPos.Position.String())
+
+	f.dir = newDir
 	f.pos = nextPos.Position
 }
 
-func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) ma.Direction {
+func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction, bool) {
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		fmt.Println("no rotate")
-		return nextPos.Direction
+		return f.dir, true
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
-		fmt.Println("rotate 180")
-		f.mo.Rotate()
-		return nextPos.Direction
+		if moveForwardOnly {
+			f.mo.Rotate()
+			fmt.Println("rotate 180")
+			return nextPos.Direction, true
+		}
+		fmt.Println("rotate 180 (no rotate)")
+		return f.dir, false
+
 	default:
 		switch f.dir {
 		case ma.Left:
@@ -92,28 +103,28 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) ma.Direction {
 			} else {
 				f.mo.Left()
 			}
-			return nextPos.Direction
+			return nextPos.Direction, true
 		case ma.Right:
 			if nextPos.Direction == ma.Up {
 				f.mo.Left()
 			} else {
 				f.mo.Right()
 			}
-			return nextPos.Direction
+			return nextPos.Direction, true
 		case ma.Down:
 			if nextPos.Direction == ma.Left {
 				f.mo.Right()
 			} else {
 				f.mo.Left()
 			}
-			return nextPos.Direction
+			return nextPos.Direction, true
 		case ma.Up:
 			if nextPos.Direction == ma.Left {
 				f.mo.Left()
 			} else {
 				f.mo.Right()
 			}
-			return nextPos.Direction
+			return nextPos.Direction, true
 		}
 		panic("invalid diff turn")
 	}

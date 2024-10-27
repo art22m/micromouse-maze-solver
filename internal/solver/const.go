@@ -15,6 +15,8 @@ const (
 
 	finishYFrom = 7
 	finishYTo   = 8
+
+	moveForwardOnly = true
 )
 
 type Position struct {
