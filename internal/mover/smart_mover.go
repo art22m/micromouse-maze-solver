@@ -94,7 +94,7 @@ func (m *SmartMover) centering() {
 
 	time.Sleep(angleUpdateTime)
 	state, _ := m.getSensor()
-	m.angle = state.Imu.Yaw
+	m.angle = int(state.Imu.Yaw)
 }
 
 func (m *SmartMover) Forward(cell int) {
@@ -108,7 +108,7 @@ func (m *SmartMover) Forward(cell int) {
 		m.move("forward", dist)
 		time.Sleep(angleUpdateTime)
 		state, _ := m.getSensor()
-		m.angle = state.Imu.Yaw
+		m.angle = int(state.Imu.Yaw)
 		_, angle := m.closestDirectionAndAngle()
 		if angle >= 2 {
 			m.RotateRight(angle * 2)
@@ -139,7 +139,7 @@ func (m *SmartMover) Backward(cell int) {
 		m.move("backward", dist)
 		time.Sleep(angleUpdateTime)
 		state, _ := m.getSensor()
-		m.angle = state.Imu.Yaw
+		m.angle = int(state.Imu.Yaw)
 		_, angle := m.closestDirectionAndAngle()
 		if angle >= 2 {
 			m.RotateRight(angle * 2)
@@ -169,7 +169,7 @@ func (m *SmartMover) RotateLeft(degrees int) {
 func (m *SmartMover) Left() {
 	time.Sleep(angleUpdateTime)
 	state, _ := m.getSensor()
-	m.angle = state.Imu.Yaw
+	m.angle = int(state.Imu.Yaw)
 
 	_, angleDiff := m.closestDirectionAndAngle()
 
@@ -185,11 +185,10 @@ func (m *SmartMover) RotateRight(degrees int) {
 func (m *SmartMover) Right() {
 	time.Sleep(angleUpdateTime)
 	state, _ := m.getSensor()
-	m.angle = state.Imu.Yaw
+	m.angle = int(state.Imu.Yaw)
 
 	_, angleDiff := m.closestDirectionAndAngle()
-
-	m.RotateLeft(90 + angleDiff)
+	m.RotateRight(90 + angleDiff)
 }
 
 func (m *SmartMover) Rotate() {

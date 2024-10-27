@@ -28,21 +28,21 @@ type Cell struct {
 
 type CellResp struct {
 	Laser struct {
-		Back    int `json:"1"`
-		Left    int `json:"2"`
-		Right45 int `json:"3"`
-		Front   int `json:"4"`
-		Right   int `json:"5"`
-		Left45  int `json:"6"`
+		Back    float64 `json:"1"`
+		Left    float64 `json:"2"`
+		Right45 float64 `json:"3"`
+		Front   float64 `json:"4"`
+		Right   float64 `json:"5"`
+		Left45  float64 `json:"6"`
 	} `json:"laser"`
 	Imu struct {
-		Roll  int `json:"roll"`
-		Pitch int `json:"pitch"`
-		Yaw   int `json:"yaw"`
+		Roll  float64 `json:"roll"`
+		Pitch float64 `json:"pitch"`
+		Yaw   float64 `json:"yaw"`
 	} `json:"imu"`
 }
 
-const wallThreshold int = 100
+const wallThreshold float64 = 140
 
 func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 	var w maze.Wall
@@ -141,7 +141,7 @@ func (m baseMover) move(direction string, value int) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("get /move", resp)
+	log.Println("get /move", resp.Body)
 	return resp, err
 }
 
@@ -173,12 +173,12 @@ func (m baseMover) getSensor() (*CellResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("get /sensor", resp)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("get /sensor", string(body))
 
 	// Unmarshal the JSON response into the struct
 	var cellResp CellResp

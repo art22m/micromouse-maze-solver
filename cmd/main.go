@@ -23,7 +23,8 @@ func main() {
 	flag.Parse()
 	fmt.Println(*sip, *mip, *id)
 
-	mover := mo.NewDummyMover(*sip, *mip, *id)
+	//mover := mo.NewDummyMover(*sip, *mip, *id)
+	mover := mo.NewSmartMover(*sip, *mip, *id)
 	config := solver.FloodFillConfig{
 		StartDirection:  maze.Up,
 		StartPosition:   solver.NewPosition(0, 0),

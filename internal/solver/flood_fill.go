@@ -79,7 +79,7 @@ func (f *FloodFill) Solve() {
 
 func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
-	log.Printf("next pos=%v\n", nextPos.y)
+	log.Printf("want to go to %v\n", nextPos.String())
 
 	newDir, moveForward := f.rotateIfNeeded(nextPos)
 	log.Printf("prev dir=%v, new dir=%v\n", f.dir.String(), newDir.String())
