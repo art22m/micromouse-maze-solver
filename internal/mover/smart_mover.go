@@ -9,11 +9,12 @@ import (
 )
 
 type SmartMover struct {
-	angle int // from 0 to 360 degrees
-	front int
-	back  int
-	left  int
-	right int
+	angle      int // from 0 to 360 degrees
+	startAngle int
+	front      int
+	back       int
+	left       int
+	right      int
 
 	baseMover
 }
@@ -37,6 +38,11 @@ func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 	}
 }
 
+func (m *SmartMover) Calibrate() {
+	state, _ := m.getSensor()
+	m.startAngle = int(state.Imu.Yaw)
+}
+
 const (
 	Front     = 0
 	Right     = 90
@@ -47,10 +53,10 @@ const (
 
 func (m *SmartMover) closestDirectionAndAngle() (string, int) {
 	directions := map[string]int{
-		"Front": Front,
-		"Right": Right,
-		"Down":  Down,
-		"Left":  Left,
+		"Front": Front + m.startAngle,
+		"Right": Right + m.startAngle,
+		"Down":  Down + m.startAngle,
+		"Left":  Left + m.startAngle,
 	}
 
 	minDiff := 360.0
