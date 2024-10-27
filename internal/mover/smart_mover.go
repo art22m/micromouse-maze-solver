@@ -20,15 +20,15 @@ type SmartMover struct {
 }
 
 const (
-	angleUpdateTime = time.Second
-	frontUpdateTime = time.Second
-	backUpdateTime  = time.Second
-	allUpdateTime   = 2 * time.Second
+	angleUpdateTime = 500 * time.Millisecond
+	frontUpdateTime = 500 * time.Millisecond
+	backUpdateTime  = 500 * time.Millisecond
+	allUpdateTime   = 1 * time.Second
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 	log.SetPrefix("smart-mover: ")
-	return &SmartMover{
+	sm := &SmartMover{
 		angle: 0,
 		baseMover: baseMover{
 			motorsIP:  motorsIP,
@@ -36,6 +36,8 @@ func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 			id:        id,
 		},
 	}
+	sm.Calibrate()
+	return sm
 }
 
 func (m *SmartMover) Calibrate() {
