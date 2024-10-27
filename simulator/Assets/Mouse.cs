@@ -93,6 +93,29 @@ public class Mouse : MonoBehaviour
     }
 
     public SensorReading readSensors() {
+        if (isExact) {
+            sensorReading.forward = forward.getDistance();
+            sensorReading.backward = backward.getDistance();
+            sensorReading.left = left.getDistance();
+            sensorReading.right = right.getDistance();
+            sensorReading.leftDiagonal = diagonalLeft.getDistance();
+            sensorReading.rightDiagonal = diagonalRight.getDistance();
+            sensorReading.yaw = readYaw();
+        } else {
+            if (yawUpdateIntervalSeconds == 0) {
+                sensorReading.yaw = readYaw(); 
+            }
+            if (laserUpdateIntervalSeconds == 0) {
+                sensorReading.forward = forward.getDistance();
+                sensorReading.backward = backward.getDistance();
+                sensorReading.left = left.getDistance();
+                sensorReading.right = right.getDistance();
+                sensorReading.leftDiagonal = diagonalLeft.getDistance();
+                sensorReading.rightDiagonal = diagonalRight.getDistance();           
+            }
+        }
+
+
         return sensorReading;
     }
 
@@ -110,21 +133,19 @@ public class Mouse : MonoBehaviour
 
     void Update() {
         if (isExact) {
-            sensorReading.forward = forward.getDistance();
-            sensorReading.backward = backward.getDistance();
-            sensorReading.left = left.getDistance();
-            sensorReading.right = right.getDistance();
-            sensorReading.leftDiagonal = diagonalLeft.getDistance();
-            sensorReading.rightDiagonal = diagonalRight.getDistance();
-            sensorReading.yaw = readYaw();
-        } else {
-            time += Time.deltaTime;
+            return;
+        }
 
+        time += Time.deltaTime;
+
+        if (yawUpdateIntervalSeconds != 0) {
             if (time > nextYawUpdateAt) {
                 nextYawUpdateAt += yawUpdateIntervalSeconds;
                 sensorReading.yaw = readYaw();
             }
-            
+        }
+        
+        if (laserUpdateIntervalSeconds != 0) {
             if (time > nextForwardUpdateAt) {
                 nextForwardUpdateAt += laserUpdateIntervalSeconds;
                 sensorReading.forward = forward.getDistance();
@@ -145,7 +166,7 @@ public class Mouse : MonoBehaviour
                 sensorReading.right = right.getDistance();
             }
 
-             if (time > nextLeftDiagonalUpdateAt) {
+                if (time > nextLeftDiagonalUpdateAt) {
                 nextLeftDiagonalUpdateAt += laserUpdateIntervalSeconds;
                 sensorReading.leftDiagonal = diagonalLeft.getDistance();
             }
