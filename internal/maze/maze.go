@@ -1,5 +1,7 @@
 package maze
 
+import "strings"
+
 type Direction int
 
 const (
@@ -19,6 +21,20 @@ func (d Direction) TurnsCount(dc Direction) int {
 	return 2
 }
 
+func (d Direction) String() string {
+	switch d {
+	case Up:
+		return "up"
+	case Right:
+		return "right"
+	case Down:
+		return "down"
+	case Left:
+		return "left"
+	}
+	return "unknown"
+}
+
 type Wall int
 
 const (
@@ -27,17 +43,17 @@ const (
 	R      = 1 << 2
 	D      = 1 << 3
 
-	LD = L | D
-	RD = R | D
-	UR = U | R
-	UL = U | L
-	LR = L | R
-	UD = U | D
-
-	LRD = L | R | D
-	URD = U | R | D
-	LUR = L | U | R
-	LUD = L | U | D
+	//LD = L | D
+	//RD = R | D
+	//UR = U | R
+	//UL = U | L
+	//LR = L | R
+	//UD = U | D
+	//
+	//LRD = L | R | D
+	//URD = U | R | D
+	//LUR = L | U | R
+	//LUD = L | U | D
 
 	Empty = 0
 	Full  = L | U | R | D
@@ -53,6 +69,23 @@ func (w Wall) Contains(wc Wall) bool {
 // NOTE: wc should be only L R U D
 func (w *Wall) Add(wc Wall) {
 	*w |= wc
+}
+
+func (w Wall) String() string {
+	var sb strings.Builder
+	if w.Contains(U) {
+		sb.WriteByte('U')
+	}
+	if w.Contains(R) {
+		sb.WriteByte('R')
+	}
+	if w.Contains(D) {
+		sb.WriteByte('D')
+	}
+	if w.Contains(L) {
+		sb.WriteByte('L')
+	}
+	return "unknown"
 }
 
 func abs(v int) int {

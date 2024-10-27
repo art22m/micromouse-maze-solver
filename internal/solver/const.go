@@ -1,6 +1,10 @@
 package solver
 
-import "jackson/internal/maze"
+import (
+	"fmt"
+
+	"jackson/internal/maze"
+)
 
 const (
 	width  = 16
@@ -21,7 +25,29 @@ func NewPosition(x, y int) Position {
 	return Position{x: x, y: y}
 }
 
+func (p Position) Shift(dir maze.Direction) Position {
+	switch dir {
+	case maze.Up:
+		return Position{p.x + 1, p.y}
+	case maze.Right:
+		return Position{p.x, p.y + 1}
+	case maze.Down:
+		return Position{p.x - 1, p.y}
+	case maze.Left:
+		return Position{p.x, p.y - 1}
+	}
+	return p
+}
+
+func (p Position) String() string {
+	return fmt.Sprintf("(%v, %v)", p.x, p.y)
+}
+
 type PositionWithDirection struct {
 	Position
 	maze.Direction
+}
+
+func (p PositionWithDirection) String() string {
+	return fmt.Sprintf("dir=%v, pos=%v", p.Direction.String(), p.Position.String())
 }

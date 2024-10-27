@@ -21,46 +21,44 @@ func getNearest(x, from, to int) int {
 }
 
 func getNeighboursWithDirection(pos Position) (res []PositionWithDirection) {
-	x, y := pos.x, pos.y
-	if validPosition(x-1, y) {
-		res = append(res, PositionWithDirection{Position{x - 1, y}, maze.Down})
+	if validPosition(pos.Shift(maze.Down)) {
+		res = append(res, PositionWithDirection{pos.Shift(maze.Down), maze.Down})
 	}
-	if validPosition(x+1, y) {
-		res = append(res, PositionWithDirection{Position{x + 1, y}, maze.Up})
+	if validPosition(pos.Shift(maze.Up)) {
+		res = append(res, PositionWithDirection{pos.Shift(maze.Up), maze.Up})
 	}
-	if validPosition(x, y-1) {
-		res = append(res, PositionWithDirection{Position{x, y - 1}, maze.Left})
+	if validPosition(pos.Shift(maze.Left)) {
+		res = append(res, PositionWithDirection{pos.Shift(maze.Left), maze.Left})
 	}
-	if validPosition(x, y+1) {
-		res = append(res, PositionWithDirection{Position{x, y + 1}, maze.Right})
+	if validPosition(pos.Shift(maze.Right)) {
+		res = append(res, PositionWithDirection{pos.Shift(maze.Right), maze.Right})
 	}
 	return res
 }
 
 func getNeighboursNotFinish(pos Position) (res []Position) {
-	x, y := pos.x, pos.y
-	if checkPositionNotFinish(x-1, y) {
-		res = append(res, Position{x - 1, y})
+	if checkPositionNotFinish(pos.Shift(maze.Down)) {
+		res = append(res, pos.Shift(maze.Down))
 	}
-	if checkPositionNotFinish(x+1, y) {
-		res = append(res, Position{x + 1, y})
+	if checkPositionNotFinish(pos.Shift(maze.Up)) {
+		res = append(res, pos.Shift(maze.Up))
 	}
-	if checkPositionNotFinish(x, y-1) {
-		res = append(res, Position{x, y - 1})
+	if checkPositionNotFinish(pos.Shift(maze.Left)) {
+		res = append(res, pos.Shift(maze.Left))
 	}
-	if checkPositionNotFinish(x, y+1) {
-		res = append(res, Position{x, y + 1})
+	if checkPositionNotFinish(pos.Shift(maze.Right)) {
+		res = append(res, pos.Shift(maze.Right))
 	}
 	return res
 }
 
-func validPosition(x, y int) bool {
-	return 0 <= x && x < height && 0 <= y && y < width
+func validPosition(pos Position) bool {
+	return 0 <= pos.x && pos.x < height && 0 <= pos.y && pos.y < width
 }
 
-func checkPositionNotFinish(x, y int) bool {
-	if finishXFrom <= x && x <= finishXTo && finishYFrom <= y && y <= finishYTo {
+func checkPositionNotFinish(pos Position) bool {
+	if finishXFrom <= pos.x && pos.x <= finishXTo && finishYFrom <= pos.y && pos.y <= finishYTo {
 		return false
 	}
-	return validPosition(x, y)
+	return validPosition(pos)
 }

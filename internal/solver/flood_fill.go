@@ -16,8 +16,9 @@ type FloodFill struct {
 	cells [][]ma.Wall
 
 	dir ma.Direction
-	mo  mo.Mover
 	pos Position
+
+	mo mo.Mover
 }
 
 func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
@@ -39,19 +40,23 @@ func NewFloodFill(dir ma.Direction, pos Position, mover mo.Mover) *FloodFill {
 		flood: flood,
 		cells: cells,
 		mo:    mover,
-		dir:   dir,
 		pos:   pos,
+		dir:   dir,
 	}
 }
 
 func (f *FloodFill) Solve() {
+	it := 0
 	for {
 		if f.getFlood(f.pos) == 0 {
 			log.Println("reached finish")
 			break
 		}
 
-		f.getAndUpdateWalls()
+		it++
+		log.Printf("iteration #%d", it)
+
+		f.updateWalls()
 		f.floodFill()
 		f.move()
 	}
@@ -59,23 +64,26 @@ func (f *FloodFill) Solve() {
 
 func (f *FloodFill) move() {
 	nextPos := f.getNextPosition()
+	log.Printf("next pos=%v\n", nextPos.y)
 
-	f.rotateIfNeeded(nextPos)
-	f.dir = nextPos.Direction
+	newDir := f.rotateIfNeeded(nextPos)
+	log.Printf("prev dir=%v, new dir=%v\n", f.dir.String(), newDir.String())
+	f.dir = newDir
 
 	f.mo.Forward(1)
+	log.Printf("prev pos=%v, new pos=%v\n", f.pos.String(), nextPos.Position.String())
 	f.pos = nextPos.Position
 }
 
-func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
+func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) ma.Direction {
 	switch {
 	case f.dir.TurnsCount(nextPos.Direction) == 0:
 		fmt.Println("no rotate")
-		return
+		return nextPos.Direction
 	case f.dir.TurnsCount(nextPos.Direction) == 2:
 		fmt.Println("rotate 180")
 		f.mo.Rotate()
-		return
+		return nextPos.Direction
 	default:
 		switch f.dir {
 		case ma.Left:
@@ -84,28 +92,28 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) {
 			} else {
 				f.mo.Left()
 			}
-			return
+			return nextPos.Direction
 		case ma.Right:
 			if nextPos.Direction == ma.Up {
 				f.mo.Left()
 			} else {
 				f.mo.Right()
 			}
-			return
+			return nextPos.Direction
 		case ma.Down:
 			if nextPos.Direction == ma.Left {
 				f.mo.Right()
 			} else {
 				f.mo.Left()
 			}
-			return
+			return nextPos.Direction
 		case ma.Up:
 			if nextPos.Direction == ma.Left {
 				f.mo.Left()
 			} else {
 				f.mo.Right()
 			}
-			return
+			return nextPos.Direction
 		}
 		panic("invalid diff turn")
 	}
@@ -133,32 +141,33 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 	return res[0]
 }
 
-func (f *FloodFill) getAndUpdateWalls() {
+func (f *FloodFill) updateWalls() {
 	state := f.mo.CellState(f.dir)
+	log.Printf("got state: wall=%v\n", state.Wall.String())
+
 	f.updateWallsIfNeeded(f.pos, state.Wall)
 	f.updateNeighboursWallsIfNeeded(f.pos, state.Wall)
 }
 
 func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
-	if !validPosition(pos.x, pos.y) {
+	if !validPosition(pos) {
 		return
 	}
 	f.cells[pos.x][pos.y] |= wall
 }
 
 func (f *FloodFill) updateNeighboursWallsIfNeeded(pos Position, wall ma.Wall) {
-	x, y := pos.x, pos.y
 	if wall.Contains(ma.L) {
-		f.updateWallsIfNeeded(Position{x, y - 1}, ma.R)
+		f.updateWallsIfNeeded(pos.Shift(ma.Left), ma.R)
 	}
 	if wall.Contains(ma.U) {
-		f.updateWallsIfNeeded(Position{x + 1, y}, ma.D)
+		f.updateWallsIfNeeded(pos.Shift(ma.Up), ma.D)
 	}
 	if wall.Contains(ma.R) {
-		f.updateWallsIfNeeded(Position{x, y + 1}, ma.L)
+		f.updateWallsIfNeeded(pos.Shift(ma.Right), ma.L)
 	}
 	if wall.Contains(ma.D) {
-		f.updateWallsIfNeeded(Position{x - 1, y}, ma.U)
+		f.updateWallsIfNeeded(pos.Shift(ma.Down), ma.U)
 	}
 }
 
@@ -198,8 +207,8 @@ func (f *FloodFill) getMinOpenNeighbourNotFinish(pos Position) (res Position) {
 		if !f.isOpen(pos, n) {
 			continue
 		}
-		if f.flood[n.x][n.y] < mn {
-			mn = f.flood[n.x][n.y]
+		if f.getFlood(n) < mn {
+			mn = f.getFlood(n)
 			res = n
 		}
 	}
@@ -227,13 +236,13 @@ func (f *FloodFill) isOpen(from Position, to Position) bool {
 	}
 	switch {
 	case x1 < x2:
-		return f.cells[x1][y1]&ma.U == 0
+		return f.getCell(from)&ma.U == 0
 	case x1 > x2:
-		return f.cells[x1][y1]&ma.D == 0
+		return f.getCell(from)&ma.D == 0
 	case y1 > y2:
-		return f.cells[x1][y1]&ma.L == 0
+		return f.getCell(from)&ma.L == 0
 	case y1 < y2:
-		return f.cells[x1][y1]&ma.R == 0
+		return f.getCell(from)&ma.R == 0
 	default:
 		panic("wtf??")
 	}
