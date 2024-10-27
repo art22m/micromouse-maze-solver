@@ -55,10 +55,10 @@ const (
 
 func (m *SmartMover) closestDirectionAndAngle() (string, int) {
 	directions := map[string]int{
-		"Front": Front + m.startAngle,
-		"Right": Right + m.startAngle,
-		"Down":  Down + m.startAngle,
-		"Left":  Left + m.startAngle,
+		"Front": Front,
+		"Right": Right,
+		"Down":  Down,
+		"Left":  Left,
 	}
 
 	minDiff := 360.0
@@ -66,7 +66,7 @@ func (m *SmartMover) closestDirectionAndAngle() (string, int) {
 	var angleDiff int
 
 	for dir, angle := range directions {
-		diff := angle - m.angle
+		diff := m.angle - angle
 		if diff > 180 {
 			diff -= 360
 		} else if diff < -180 {
@@ -91,7 +91,7 @@ func (m *SmartMover) isNotAimedAtCenter() bool {
 // Метод для центрирования робота к ближайшей оси
 func (m *SmartMover) centering() {
 	direction, angleDiff := m.closestDirectionAndAngle()
-	log.Printf("Closest Direction: %s, diff: %s", direction, angleDiff)
+	log.Printf("Closest Direction: %s, diff: %d", direction, angleDiff)
 	if angleDiff > 0 {
 		m.RotateLeft(int(angleDiff))
 	} else if angleDiff < 0 {
