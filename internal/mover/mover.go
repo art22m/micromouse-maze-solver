@@ -114,8 +114,9 @@ func (m baseMover) move(direction string, value int) (*http.Response, error) {
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.motorsIP, "move")
+	log.Printf("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
 
-	reqBody, _ := json.Marshal(struct {
+	reqBody, err := json.Marshal(struct {
 		Id        string `json:"id"`
 		Direction string `json:"direction"`
 		Len       int    `json:"len"`
@@ -124,12 +125,23 @@ func (m baseMover) move(direction string, value int) (*http.Response, error) {
 		Direction: direction,
 		Len:       value,
 	})
+	if err != nil {
+		return nil, err
+	}
+
 	requestBody := bytes.NewBuffer(reqBody)
 
 	req, err := http.NewRequest(http.MethodPut, reqUrl, requestBody)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Content-Type", `application/json`)
 
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("get /move", resp)
 	return resp, err
 }
 
@@ -139,18 +151,29 @@ func (m baseMover) getSensor() (*CellResp, error) {
 	{"id": "123456", "type": "all"}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.sensorsIP, "sensor")
+	log.Printf("send /sensor to %s\n", reqUrl)
 
-	reqBody, _ := json.Marshal(map[string]string{
+	reqBody, err := json.Marshal(map[string]string{
 		"id":   m.id,
 		"type": "all",
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	requestBody := bytes.NewBuffer(reqBody)
 
 	req, err := http.NewRequest(http.MethodPost, reqUrl, requestBody)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Content-Type", `application/json`)
 
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("get /sensor", resp)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

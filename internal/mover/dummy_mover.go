@@ -11,7 +11,7 @@ type DummyMover struct {
 }
 
 func NewDummyMover(sensorsIP, motorsIP string, id string) *DummyMover {
-	log.SetPrefix("mover: ")
+	log.SetPrefix("dummy-mover: ")
 	return &DummyMover{
 		baseMover: baseMover{
 			motorsIP:  motorsIP,

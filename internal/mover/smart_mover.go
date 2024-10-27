@@ -24,6 +24,7 @@ const (
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
+	log.SetPrefix("smart-mover: ")
 	return &SmartMover{
 		angle: 0,
 		baseMover: baseMover{
