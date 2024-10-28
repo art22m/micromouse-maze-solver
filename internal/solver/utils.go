@@ -171,3 +171,18 @@ func (f *FloodFill) printWalls() {
 	}
 	log.Println("-------------")
 }
+
+func (f *FloodFill) printVisited() {
+	log.Println("----visited-----")
+	for i := height - 1; i >= 0; i-- {
+		for j := 0; j < width; j++ {
+			if f.visited[i][j] {
+				fmt.Print("x")
+			} else {
+				fmt.Print("o")
+			}
+		}
+		fmt.Println()
+	}
+	log.Println("-------------")
+}

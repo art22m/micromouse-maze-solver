@@ -1,6 +1,7 @@
 package solver
 
 import (
+	"fmt"
 	"math"
 	"slices"
 
@@ -8,6 +9,8 @@ import (
 )
 
 func (f *FloodFill) shortestPath() (path []Position) {
+	f.printVisited()
+
 	dist := make([][]int, height)
 	for x := 0; x < height; x++ {
 		dist[x] = make([]int, width)
@@ -26,11 +29,14 @@ func (f *FloodFill) shortestPath() (path []Position) {
 	var finish *Position
 	for !q.Empty() {
 		curr := q.Pop()
+		fmt.Println()
+		fmt.Println(curr.String())
 		nb := f.getVisitedOpenNeighbours(curr)
 		for _, n := range nb {
 			if dist[n.x][n.y] != math.MaxInt {
 				continue
 			}
+			fmt.Println(n.String())
 			dist[n.x][n.y] = dist[curr.x][curr.y] + 1
 			parent[n] = &curr
 			q.Push(n)
