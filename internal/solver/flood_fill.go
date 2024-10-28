@@ -67,6 +67,8 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 
 		finishFrom: Position{finishXFrom, finishYFrom},
 		finishTo:   Position{finishXTo, finishYTo},
+
+		logger: config.Logger,
 	}
 	ff.dummyFloodFill()
 	return ff
@@ -88,11 +90,11 @@ func (f *FloodFill) RunFastPath(
 	f.dir = dir
 
 	path := f.shortestPath()
-	fmt.Println("found shortest path:")
+	fmt.Println("shortest path:")
 	for _, p := range path {
-		fmt.Println(p.String())
+		fmt.Print(p.String(), "->")
 	}
-	fmt.Println("--------------")
+	fmt.Println("\n--------------")
 
 	if !f.pos.Equal(path[0]) {
 		panic("should be equal to current position")
@@ -105,10 +107,12 @@ func (f *FloodFill) RunFastPath(
 		}
 		f.move(f.calculateDirection(path[i]))
 	}
-	f.logger.Println("done")
+	f.logger.Info("done")
 }
 
 func (f *FloodFill) Solve() {
+	fmt.Println("started...")
+
 	f.startToFinish()
 
 	fmt.Println("\n" +
@@ -134,12 +138,12 @@ func (f *FloodFill) Solve() {
 }
 
 func (f *FloodFill) startToFinish() {
-	f.logger.Println("finding path from start to finish")
+	f.logger.Info("finding path from start to finish")
 	f.start()
 }
 
 func (f *FloodFill) finishToStart() {
-	f.logger.Println("finding path from finish to start")
+	f.logger.Info("finding path from finish to start")
 
 	f.flood = make([][]int, height)
 	for i := 0; i < height; i++ {
@@ -166,7 +170,7 @@ func (f *FloodFill) start() {
 		f.move(f.getNextPosition)
 	}
 
-	f.logger.Println("finish was reached")
+	f.logger.Info("finish was reached")
 	f.printFlood()
 	f.printWalls()
 }

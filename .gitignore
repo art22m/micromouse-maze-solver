@@ -24,4 +24,4 @@ go.work
 .idea/
 .DS_Store
 
-.log
+*.log

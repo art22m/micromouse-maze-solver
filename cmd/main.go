@@ -38,13 +38,15 @@ func main() {
 	mip := flag.String("bip", motorsIP, "")
 	id := flag.String("id", robotID, "")
 	flag.Parse()
-	fmt.Println(*sip, *mip, *id, dummy, backward)
+
+	fmt.Println("flags", *sip, *mip, *id, dummy, backward)
 
 	var mover mo.Mover
 	if *dummy {
 		mover = mo.NewDummyMover(log.WithField("entity", "dummy-mover"), *sip, *mip, *id)
 	} else {
-		mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
+		mover = mo.NewSmartMover(*sip, *mip, *id)
+		//mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
 	}
 
 	config := solver.FloodFillConfig{

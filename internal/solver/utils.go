@@ -1,7 +1,7 @@
 package solver
 
 import (
-	"log"
+	"fmt"
 	"sort"
 
 	ma "jackson/internal/maze"
@@ -150,38 +150,38 @@ func (f *FloodFill) setVisited() {
 }
 
 func (f *FloodFill) printFlood() {
-	f.logger.Println("----flood-----")
+	fmt.Println("----flood-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			log.Printf("%-4v", f.flood[i][j])
+			fmt.Printf("%-4v", f.flood[i][j])
 		}
-		log.Println()
+		fmt.Println()
 	}
-	f.logger.Println("-------------")
+	fmt.Println("-------------")
 }
 
 func (f *FloodFill) printWalls() {
-	f.logger.Println("----walls-----")
+	fmt.Println("----walls-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
-			log.Printf("%-4v", f.cells[i][j])
+			fmt.Printf("%-4v", f.cells[i][j])
 		}
-		log.Println()
+		fmt.Println()
 	}
-	f.logger.Println("-------------")
+	fmt.Println("-------------")
 }
 
 func (f *FloodFill) printVisited() {
-	f.logger.Println("----visited-----")
+	fmt.Println("----visited-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
 			if f.visited[i][j] {
-				log.Print("x")
+				fmt.Print("x")
 			} else {
-				log.Print("o")
+				fmt.Print("o")
 			}
 		}
-		log.Println()
+		fmt.Println()
 	}
-	f.logger.Println("-------------")
+	fmt.Println("-------------")
 }
