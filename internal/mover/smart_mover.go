@@ -27,10 +27,10 @@ type SmartMover struct {
 }
 
 const (
-	angleUpdateTime = 500 * time.Millisecond
-	frontUpdateTime = 500 * time.Millisecond
-	backUpdateTime  = 500 * time.Millisecond
-	allUpdateTime   = 500 * time.Millisecond
+	angleUpdateTime = 5 * time.Millisecond
+	frontUpdateTime = 5 * time.Millisecond
+	backUpdateTime  = 5 * time.Millisecond
+	allUpdateTime   = 5 * time.Millisecond
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
@@ -139,11 +139,11 @@ func (m *SmartMover) updateAngle() {
 func (m *SmartMover) Forward(cell int) {
 	for i := 0; i < cell; i++ {
 		m.updateAngle()
-		if m.isNotAimedAtCenter() {
+		for m.isNotAimedAtCenter() {
 			m.centering()
 		}
 
-		m.move("forward", 125)
+		m.move("forward", 180)
 
 		dist := m.calcFrontDistance()
 		fmt.Println("!!! dist:", dist)
@@ -175,7 +175,7 @@ func (m *SmartMover) calcFrontDistance() int {
 }
 
 func (m *SmartMover) Backward(cell int) {
-	if m.isNotAimedAtCenter() {
+	for m.isNotAimedAtCenter() {
 		m.centering()
 	}
 
