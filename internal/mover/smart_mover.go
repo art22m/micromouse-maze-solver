@@ -133,7 +133,7 @@ func (m *SmartMover) Forward(cell int) {
 }
 
 func (m *SmartMover) calcFrontDistance() int {
-	frontDiff := 49.0
+	frontDiff := 59.0
 	m.state, _ = m.getSensor()
 	if m.state.Laser.Front > 270 {
 		return 180
