@@ -174,7 +174,6 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 
 	client := retryablehttp.NewClient()
 	client.Logger = m.logger
-	client.
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
