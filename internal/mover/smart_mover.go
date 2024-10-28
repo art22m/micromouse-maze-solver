@@ -212,18 +212,18 @@ func (m *SmartMover) RotateLeft(degrees int) {
 		degrees += m.leftPlus
 	}
 
-	// if degrees < 40 {
-	// 	_, err := m.move("right", 120)
-	// 	if err != nil {
-	// 		return
-	// 	}
+	if degrees < 40 {
+		_, err := m.move("right", 120)
+		if err != nil {
+			return
+		}
 
-	// 	_, err = m.move("left", 120+degrees)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	return
-	// }
+		_, err = m.move("left", 120+degrees)
+		if err != nil {
+			return
+		}
+		return
+	}
 
 	_, err := m.move("left", degrees)
 	if err != nil {
@@ -246,18 +246,18 @@ func (m *SmartMover) RotateRight(degrees int) {
 		degrees += m.rightPlus
 	}
 
-	// if degrees < 40 {
-	// 	_, err := m.move("left", 120)
-	// 	if err != nil {
-	// 		return
-	// 	}
+	if degrees < 40 {
+		_, err := m.move("left", 120)
+		if err != nil {
+			return
+		}
 
-	// 	_, err = m.move("right", 120+degrees)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	return
-	// }
+		_, err = m.move("right", 120+degrees)
+		if err != nil {
+			return
+		}
+		return
+	}
 
 	_, err := m.move("right", degrees)
 	if err != nil {
