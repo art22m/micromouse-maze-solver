@@ -1,6 +1,9 @@
 package maze
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Direction int
 
@@ -111,4 +114,70 @@ func abs(v int) int {
 		return v
 	}
 	return -v
+}
+
+func (d Direction) Opposite() Direction {
+	switch d {
+	case Up:
+		return Down
+	case Down:
+		return Up
+	case Left:
+		return Right
+	case Right:
+		return Left
+	}
+
+	panic(fmt.Errorf("Direction.Opposite: invalid d (%d)", d))
+}
+
+func (d Direction) LocalTo(orientation Direction) Direction {
+	if orientation == Up {
+		return d
+	}
+
+	if d == orientation {
+		return Up
+	}
+
+	if d.Opposite() == orientation {
+		return Down
+	}
+
+	if orientation == Right {
+		switch d {
+		case Up:
+			return Left
+		case Down:
+			return Right
+		}
+	}
+
+	if orientation == Left {
+		switch d {
+		case Up:
+			return Right
+		case Down:
+			return Left
+		}
+	}
+
+	if orientation == Down {
+		switch d {
+		case Left:
+			return Right
+		case Right:
+			return Left
+		}
+	}
+
+	panic(fmt.Errorf("LocalTo: invalid combination of d (%d) and orientation (%d)", d, orientation))
+}
+
+func (d Direction) GlobalFrom(orientation Direction) Direction {
+	if d == orientation || d.Opposite() == orientation {
+		return d.LocalTo(orientation).Opposite()
+	}
+
+	return d.LocalTo(orientation)
 }
