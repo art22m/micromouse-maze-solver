@@ -40,6 +40,7 @@ func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 		},
 	}
 	sm.Calibrate()
+	time.Sleep(allUpdateTime)
 	return sm
 }
 
