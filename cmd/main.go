@@ -58,7 +58,7 @@ func main() {
 	if *dummy {
 		mover = mo.NewDummyMover(log.WithField("entity", "dummy-mover"), *sip, *mip, *id)
 	} else {
-		mover = mo.NewSmartMover(*sip, *mip, *id)
+		mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
 		//mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
 	}
 
