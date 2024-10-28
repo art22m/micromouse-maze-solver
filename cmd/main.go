@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	sensorsIP = "localhost:8080"
+	sensorsIP = "192.168.68.112"
 	motorsIP  = sensorsIP
-	robotID   = "1"
+	robotID   = "3547AF16067F6053"
 )
 
 func main() {

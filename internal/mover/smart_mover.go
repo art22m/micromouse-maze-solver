@@ -23,10 +23,10 @@ type SmartMover struct {
 }
 
 const (
-	angleUpdateTime = 5 * time.Millisecond
-	frontUpdateTime = 5 * time.Millisecond
-	backUpdateTime  = 5 * time.Millisecond
-	allUpdateTime   = 5 * time.Millisecond
+	angleUpdateTime = 1300 * time.Millisecond
+	frontUpdateTime = 1300 * time.Millisecond
+	backUpdateTime  = 1300 * time.Millisecond
+	allUpdateTime   = 1300 * time.Millisecond
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
