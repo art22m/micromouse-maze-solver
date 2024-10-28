@@ -136,7 +136,7 @@ func (m *SmartMover) calcFrontDistance() int {
 	frontDiff := 59.0
 	m.state, _ = m.getSensor()
 	if m.state.Laser.Front > 270 {
-		return 180
+		return 170
 	}
 	angle := m.fixAngle()
 	return int(math.Round(float64(m.state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
