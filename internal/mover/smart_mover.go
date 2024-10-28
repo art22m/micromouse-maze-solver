@@ -206,10 +206,10 @@ func (m *SmartMover) calcBackDistance() int {
 }
 
 func (m *SmartMover) RotateLeft(degrees int) {
-	degrees += m.leftPlus
+	degrees -= m.leftPlus
 
 	if degrees < 0 {
-		degrees -= m.leftPlus
+		degrees += m.leftPlus
 	}
 
 	// if degrees < 40 {
@@ -240,10 +240,10 @@ func (m *SmartMover) Left() {
 }
 
 func (m *SmartMover) RotateRight(degrees int) {
-	degrees += m.rightPlus
+	degrees -= m.rightPlus
 
 	if degrees < 0 {
-		degrees -= m.rightPlus
+		degrees += m.rightPlus
 	}
 
 	// if degrees < 40 {
