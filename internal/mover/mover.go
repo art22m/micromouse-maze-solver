@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 
 	"jackson/internal/maze"
@@ -114,7 +115,7 @@ func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.motorsIP, "move")
-	m.logger.Printf("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
+	m.logger.Infof("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
 
 	reqBody, err := json.Marshal(struct {
 		Id        string `json:"id"`
@@ -131,17 +132,19 @@ func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := http.NewRequest(http.MethodPut, reqUrl, requestBody)
+	req, err := retryablehttp.NewRequest(http.MethodPut, reqUrl, requestBody)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	resp, err := http.DefaultClient.Do(req)
+	client := retryablehttp.NewClient()
+	client.Logger = m.logger
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	m.logger.Println("get /move", resp.Body)
+	m.logger.Info("get /move", resp.Body)
 	return resp, err
 }
 
@@ -151,7 +154,7 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 	{"id": "123456", "type": "all"}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.sensorsIP, "sensor")
-	m.logger.Printf("send /sensor to %s\n", reqUrl)
+	m.logger.Infof("send /sensor to %s\n", reqUrl)
 
 	reqBody, err := json.Marshal(map[string]string{
 		"id":   m.id,
@@ -163,13 +166,16 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := http.NewRequest(http.MethodPost, reqUrl, requestBody)
+	req, err := retryablehttp.NewRequest(http.MethodPost, reqUrl, requestBody)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	resp, err := http.DefaultClient.Do(req)
+	client := retryablehttp.NewClient()
+	client.Logger = m.logger
+	client.
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -178,9 +184,8 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	m.logger.Println("get /sensor", string(body))
+	m.logger.Info("get /sensor", string(body))
 
-	// Unmarshal the JSON response into the struct
 	var cellResp CellResp
 	err = json.Unmarshal(body, &cellResp)
 	if err != nil {

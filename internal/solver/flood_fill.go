@@ -204,7 +204,6 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction,
 			return nextPos.Direction, true
 		}
 		return f.dir, false
-
 	default:
 		switch f.dir {
 		case ma.Left:
