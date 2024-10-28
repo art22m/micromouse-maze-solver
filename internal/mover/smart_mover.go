@@ -37,6 +37,7 @@ func NewSmartMover(logger *logrus.Entry, sensorsIP, motorsIP string, id string) 
 			motorsIP:  motorsIP,
 			sensorsIP: sensorsIP,
 			id:        id,
+			logger:    logger,
 		},
 	}
 

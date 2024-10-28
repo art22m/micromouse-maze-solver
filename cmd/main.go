@@ -59,7 +59,6 @@ func main() {
 		mover = mo.NewDummyMover(log.WithField("entity", "dummy-mover"), *sip, *mip, *id)
 	} else {
 		mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
-		//mover = mo.NewSmartMover(log.WithField("entity", "smart-mover"), *sip, *mip, *id)
 	}
 
 	config := solver.FloodFillConfig{
