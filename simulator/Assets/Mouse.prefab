@@ -625,7 +625,7 @@ MonoBehaviour:
   leftAbsErrorMean: 0
   leftAbsErrorStd: 0
   yawAbsErrorStd: 1
-  northYawReading: 1
+  northYawReading: 0
   forwardErrorSeed: 1
   forwardAbsErrorSeed: 2
   backwardErrorSeed: 3

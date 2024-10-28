@@ -1,6 +1,7 @@
 package mover
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"time"
@@ -23,10 +24,10 @@ type SmartMover struct {
 }
 
 const (
-	angleUpdateTime = 1500 * time.Millisecond
-	frontUpdateTime = 1500 * time.Millisecond
-	backUpdateTime  = 1500 * time.Millisecond
-	allUpdateTime   = 1500 * time.Millisecond
+	angleUpdateTime = 5 * time.Millisecond
+	frontUpdateTime = 5 * time.Millisecond
+	backUpdateTime  = 5 * time.Millisecond
+	allUpdateTime   = 5 * time.Millisecond
 )
 
 func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
@@ -47,6 +48,7 @@ func NewSmartMover(sensorsIP, motorsIP string, id string) *SmartMover {
 func (m *SmartMover) Calibrate() {
 	m.state, _ = m.getSensor()
 	m.startAngle = int(m.state.Imu.Yaw)
+	m.angle = m.startAngle
 }
 
 const (
@@ -74,6 +76,7 @@ func (m *SmartMover) fixCenter() int {
 }
 
 func (m *SmartMover) fixAngle() int {
+	fmt.Println("!!!", m.angle, m.startAngle, m.targetAimAngle)
 	diff := (m.angle+360-m.startAngle)%360 - m.targetAimAngle
 	if diff > 180 {
 		diff -= 360
@@ -134,10 +137,10 @@ func (m *SmartMover) Forward(cell int) {
 }
 
 func (m *SmartMover) calcFrontDistance() int {
-	frontDiff := 59.0
+	frontDiff := 49.0
 	m.state, _ = m.getSensor()
 	if m.state.Laser.Front > 270 {
-		return 170
+		return 180
 	}
 	angle := m.fixAngle()
 	return int(math.Round(float64(m.state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
