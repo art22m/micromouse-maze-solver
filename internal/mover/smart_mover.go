@@ -54,20 +54,20 @@ func (m *SmartMover) Calibrate() {
 	m.angle = m.startAngle
 
 	time.Sleep(allUpdateTime)
-	m.RotateRight(120)
+	m.RotateRight(90)
 	time.Sleep(allUpdateTime)
 	m.state, _ = m.getSensor()
 	m.angle = int(m.state.Imu.Yaw)
-	m.rightPlus = (m.angle-m.startAngle+360)%360 - 120
+	m.rightPlus = (m.angle-m.startAngle+360)%360 - 90
 	log.Println("!!! RIGHT ERROR", m.rightPlus, "DEGREES")
 
 	prevAngle := m.angle
 	time.Sleep(allUpdateTime)
-	m.RotateLeft(120)
+	m.RotateLeft(90)
 	time.Sleep(allUpdateTime)
 	m.state, _ = m.getSensor()
 	m.angle = int(m.state.Imu.Yaw)
-	m.rightPlus = (prevAngle-m.angle+360)%360 - 120
+	m.rightPlus = (prevAngle-m.angle+360)%360 - 90
 	log.Println("!!! LEFT ERROR", m.rightPlus, "DEGREES")
 }
 
@@ -139,7 +139,7 @@ func (m *SmartMover) updateAngle() {
 func (m *SmartMover) Forward(cell int) {
 	for i := 0; i < cell; i++ {
 		m.updateAngle()
-		for m.isNotAimedAtCenter() {
+		if m.isNotAimedAtCenter() {
 			m.centering()
 		}
 
@@ -175,7 +175,7 @@ func (m *SmartMover) calcFrontDistance() int {
 }
 
 func (m *SmartMover) Backward(cell int) {
-	for m.isNotAimedAtCenter() {
+	if m.isNotAimedAtCenter() {
 		m.centering()
 	}
 
