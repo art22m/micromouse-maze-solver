@@ -143,7 +143,7 @@ func (m *SmartMover) Forward(cell int) {
 			m.centering()
 		}
 
-		m.move("forward", 170)
+		m.move("forward", 120)
 
 		dist := m.calcFrontDistance()
 		fmt.Println("!!! dist:", dist)
