@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 
 	"jackson/internal/maze"
 )
@@ -94,9 +95,6 @@ func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 			w.Add(maze.U)
 		}
 	}
-
-	log.Printf("wall: %s, dir: %s", w, robotDir)
-
 	return Cell{
 		Wall: w,
 	}
@@ -106,15 +104,17 @@ type baseMover struct {
 	motorsIP  string
 	sensorsIP string
 	id        string
+
+	logger *logrus.Entry
 }
 
-func (m baseMover) move(direction string, value int) (*http.Response, error) {
+func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 	/* move PUT:
 	http://[robot_ip]/move
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.motorsIP, "move")
-	log.Printf("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
+	m.logger.Printf("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
 
 	reqBody, err := json.Marshal(struct {
 		Id        string `json:"id"`
@@ -141,17 +141,17 @@ func (m baseMover) move(direction string, value int) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("get /move", resp.Body)
+	m.logger.Println("get /move", resp.Body)
 	return resp, err
 }
 
-func (m baseMover) getSensor() (*CellResp, error) {
+func (m *baseMover) getSensor() (*CellResp, error) {
 	/* sensors POST:
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.sensorsIP, "sensor")
-	log.Printf("send /sensor to %s\n", reqUrl)
+	m.logger.Printf("send /sensor to %s\n", reqUrl)
 
 	reqBody, err := json.Marshal(map[string]string{
 		"id":   m.id,
@@ -178,7 +178,7 @@ func (m baseMover) getSensor() (*CellResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("get /sensor", string(body))
+	m.logger.Println("get /sensor", string(body))
 
 	// Unmarshal the JSON response into the struct
 	var cellResp CellResp

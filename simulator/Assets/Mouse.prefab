@@ -607,7 +607,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a30e0b9065c456887280e9d0eb079e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExact: 0
+  isExact: 1
   forwardErrorMean: 0.03
   forwardErrorStd: 0.02
   forwardAbsErrorMean: 0
