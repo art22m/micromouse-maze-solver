@@ -5,20 +5,35 @@ import "strings"
 type Direction int
 
 const (
-	Up Direction = iota + 1
-	Right
-	Down
-	Left
+	Left  Direction = 1
+	Up    Direction = 2
+	Right Direction = 4
+	Down  Direction = 8
 )
 
 func (d Direction) TurnsCount(dc Direction) int {
 	if d == dc {
 		return 0
 	}
-	if abs(int(d-dc)) == 1 || abs(int(d-dc)) == 3 {
-		return 1
+
+	switch d {
+	case Left, Right:
+		switch dc {
+		case Up, Down:
+			return 1
+		default:
+			return 2
+		}
+	case Up, Down:
+		switch dc {
+		case Left, Right:
+			return 1
+		default:
+			return 2
+		}
 	}
-	return 2
+
+	panic("invalid directions")
 }
 
 func (d Direction) String() string {

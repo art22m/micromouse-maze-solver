@@ -14,23 +14,23 @@ func loadSmartMoverConfig() SmartMoverConfig {
 
 type RobotConfig struct {
 	// min delay between /move call and subsequent api calls
-	sensorsDelay  time.Duration `json:"sensors_delay"`
-	movementDelay time.Duration `json:"movement_delay"`
+	SensorsDelay  time.Duration `json:"sensors_delay"`
+	MovementDelay time.Duration `json:"movement_delay"`
 
 	// robot parameters
-	width          int
-	length         int
-	frontLaserZero int
-	backLaserZero  int
-	sideLasersZero int
+	Width          int `json:"width"`
+	Length         int `json:"length"`
+	FrontLaserZero int `json:"front_laser_zero"`
+	BackLaserZero  int `json:"back_laser_zero"`
+	SideLasersZero int `json:"side_lasers_zero"`
 }
 
 type SmartMoverCalibrationConfig struct {
-	forwardRatio   float32 `json:"forward_ratio"`
-	backwardRatio  float32 `json:"backward_ratio"`
-	turnRightRatio float32 `json:"right_turn_ratio"`
-	turnLeftRatio  float32 `json:"turn_left_ratio"`
-	turn180Ratio   float32 `json:"turn_180_ratio"`
+	ForwardRatio   float32 `json:"forward_ratio"`
+	BackwardRatio  float32 `json:"backward_ratio"`
+	TurnRightRatio float32 `json:"right_turn_ratio"`
+	TurnLeftRatio  float32 `json:"turn_left_ratio"`
+	Turn180Ratio   float32 `json:"turn_180_ratio"`
 	// can't turn less than this
-	minTurn int `json:"min_turn"`
+	MinTurn int `json:"min_turn"`
 }
