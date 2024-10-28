@@ -74,7 +74,7 @@ type baseMover struct {
 	logger *logrus.Entry
 }
 
-func (m *baseMover) move(direction string, value int) (*http.Response, error) {
+func (m *baseMover) move(direction string, value int) {
 	/* move PUT:
 	http://[robot_ip]/move
 	{"id": "123456", "direction":"forward", "len": 100}
@@ -92,14 +92,14 @@ func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 		Len:       value,
 	})
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	requestBody := bytes.NewBuffer(reqBody)
 
 	req, err := retryablehttp.NewRequest(http.MethodPut, reqUrl, requestBody)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
@@ -107,15 +107,14 @@ func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 	client.Logger = m.logger
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	m.logger.Info("get /move", resp.Body)
-	return resp, err
 }
 
 const sensorValueRetryThreshold = 25000.0
 
-func (m *baseMover) getSensor() (*CellResp, error) {
+func (m *baseMover) getSensor() *CellResp {
 	/* sensors POST:
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
@@ -128,14 +127,14 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 		"type": "all",
 	})
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	requestBody := bytes.NewBuffer(reqBody)
 
 	req, err := retryablehttp.NewRequest(http.MethodPost, reqUrl, requestBody)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
@@ -143,19 +142,19 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 	client.Logger = m.logger
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	m.logger.Info("get /sensor", string(body))
 
 	var cellResp CellResp
 	err = json.Unmarshal(body, &cellResp)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	l := cellResp.Laser
@@ -164,9 +163,9 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 	} {
 		if v > sensorValueRetryThreshold {
 			m.logger.Error("values is more then sensorValueRetryThreshold")
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 			return m.getSensor()
 		}
 	}
-	return &cellResp, err
+	return &cellResp
 }

@@ -110,10 +110,7 @@ func (sm *SmartMover) Backward(cells int) {
 }
 
 func (sm *SmartMover) CellState(d maze.Direction) Cell {
-	resp, err := sm.getSensor()
-	if err != nil {
-		sm.logger.Fatal(err)
-	}
+	resp := sm.getSensor()
 	cell := resp.ToCell(d)
 	sm.logger.Infof("wall: %s, dir: %s", cell, d)
 	return cell

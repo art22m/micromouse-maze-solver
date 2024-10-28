@@ -22,45 +22,27 @@ func NewDummyMover(logger *logrus.Entry, sensorsIP, motorsIP string, id string) 
 }
 
 func (m *DummyMover) Forward(cell int) {
-	_, err := m.move("forward", cell*180)
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	m.move("forward", cell*180)
 }
 
 func (m *DummyMover) Backward(cell int) {
-	_, err := m.move("backward", cell*180)
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	m.move("backward", cell*180)
 }
 
 func (m *DummyMover) Left() {
-	_, err := m.move("left", 90)
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	m.move("left", 90)
 }
 
 func (m *DummyMover) Right() {
-	_, err := m.move("right", 90)
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	m.move("right", 90)
 }
 
 func (m *DummyMover) Rotate() {
-	_, err := m.move("right", 180)
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	m.move("right", 180)
 }
 
 func (m *DummyMover) CellState(d maze.Direction) Cell {
-	resp, err := m.getSensor()
-	if err != nil {
-		m.logger.Fatal(err)
-	}
+	resp := m.getSensor()
 	cell := resp.ToCell(d)
 	m.logger.Infof("wall: %s, dir: %s", cell, d)
 	return cell
