@@ -20,6 +20,9 @@ type SmartMover struct {
 	targetAimAngle int
 	state          *CellResp
 
+	rightPlus int
+	leftPlus  int
+
 	baseMover
 }
 
@@ -49,6 +52,23 @@ func (m *SmartMover) Calibrate() {
 	m.state, _ = m.getSensor()
 	m.startAngle = int(m.state.Imu.Yaw)
 	m.angle = m.startAngle
+
+	time.Sleep(allUpdateTime)
+	m.RotateRight(120)
+	time.Sleep(allUpdateTime)
+	m.state, _ = m.getSensor()
+	m.angle = int(m.state.Imu.Yaw)
+	m.rightPlus = (m.angle-m.startAngle+360)%360 - 120
+	log.Println("!!! RIGHT ERROR", m.rightPlus, "DEGREES")
+
+	prevAngle := m.angle
+	time.Sleep(allUpdateTime)
+	m.RotateLeft(120)
+	time.Sleep(allUpdateTime)
+	m.state, _ = m.getSensor()
+	m.angle = int(m.state.Imu.Yaw)
+	m.rightPlus = (prevAngle-m.angle+360)%360 - 120
+	log.Println("!!! LEFT ERROR", m.rightPlus, "DEGREES")
 }
 
 const (
@@ -117,15 +137,23 @@ func (m *SmartMover) updateAngle() {
 }
 
 func (m *SmartMover) Forward(cell int) {
-	m.updateAngle()
-	if m.isNotAimedAtCenter() {
-		m.centering()
-	}
-
 	for i := 0; i < cell; i++ {
-		time.Sleep(frontUpdateTime)
+		m.updateAngle()
+		for m.isNotAimedAtCenter() {
+			m.centering()
+		}
+
+		m.move("forward", 180)
+
 		dist := m.calcFrontDistance()
-		m.move("forward", dist)
+		fmt.Println("!!! dist:", dist)
+		if dist != -1 {
+			if dist < -5 {
+				m.move("backward", -dist)
+			} else if dist > 5 {
+				m.move("forward", dist)
+			}
+		}
 		//m.updateAngle()
 		//_, angle := m.fixAngle()
 		//if angle >= 2 {
@@ -139,15 +167,15 @@ func (m *SmartMover) Forward(cell int) {
 func (m *SmartMover) calcFrontDistance() int {
 	frontDiff := 49.0
 	m.state, _ = m.getSensor()
-	if m.state.Laser.Front > 270 {
-		return 180
+	if m.state.Laser.Front > 100 {
+		return -1
 	}
 	angle := m.fixAngle()
 	return int(math.Round(float64(m.state.Laser.Front) - frontDiff/math.Cos(math.Abs(float64(angle))*(math.Pi/180.0))))
 }
 
 func (m *SmartMover) Backward(cell int) {
-	if m.isNotAimedAtCenter() {
+	for m.isNotAimedAtCenter() {
 		m.centering()
 	}
 
@@ -178,6 +206,25 @@ func (m *SmartMover) calcBackDistance() int {
 }
 
 func (m *SmartMover) RotateLeft(degrees int) {
+	degrees += m.leftPlus
+
+	if degrees < 0 {
+		degrees -= m.leftPlus
+	}
+
+	if degrees < 40 {
+		_, err := m.move("right", 120)
+		if err != nil {
+			return
+		}
+
+		_, err = m.move("left", 120+degrees)
+		if err != nil {
+			return
+		}
+		return
+	}
+
 	_, err := m.move("left", degrees)
 	if err != nil {
 		return
@@ -193,6 +240,25 @@ func (m *SmartMover) Left() {
 }
 
 func (m *SmartMover) RotateRight(degrees int) {
+	degrees += m.rightPlus
+
+	if degrees < 0 {
+		degrees -= m.rightPlus
+	}
+
+	if degrees < 40 {
+		_, err := m.move("left", 120)
+		if err != nil {
+			return
+		}
+
+		_, err = m.move("right", 120+degrees)
+		if err != nil {
+			return
+		}
+		return
+	}
+
 	_, err := m.move("right", degrees)
 	if err != nil {
 		return

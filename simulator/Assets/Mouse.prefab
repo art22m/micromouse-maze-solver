@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb820ac8610454a2fada6a3f808ec407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxReading: 500
+  maxReading: 191
   errorMean: 0
   errorStd: 0.05
   absErrorMean: 0
@@ -608,7 +608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExact: 0
-  forwardErrorMean: 0
+  forwardErrorMean: 0.03
   forwardErrorStd: 0.02
   forwardAbsErrorMean: 0
   forwardAbsErrorStd: 0
@@ -618,11 +618,11 @@ MonoBehaviour:
   backwardAbsErrorStd: 0
   rightErrorMean: 0
   rightErrorStd: 0.02
-  rightAbsErrorMean: 0
+  rightAbsErrorMean: -7
   rightAbsErrorStd: 0
   leftErrorMean: 0
   leftErrorStd: 0.02
-  leftAbsErrorMean: 0
+  leftAbsErrorMean: -5
   leftAbsErrorStd: 0
   yawAbsErrorStd: 1
   northYawReading: 0
