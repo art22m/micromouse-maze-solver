@@ -5,10 +5,10 @@ import "strings"
 type Direction int
 
 const (
-	Left  Direction = 1
-	Up    Direction = 2
-	Right Direction = 4
-	Down  Direction = 8
+	Left  Direction = 1 << 0
+	Up              = 1 << 1
+	Right           = 1 << 2
+	Down            = 1 << 3
 )
 
 func (d Direction) TurnsCount(dc Direction) int {
