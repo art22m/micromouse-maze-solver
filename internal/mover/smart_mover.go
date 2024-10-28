@@ -2,6 +2,7 @@ package mover
 
 import (
 	"log"
+	"math"
 	"time"
 
 	"jackson/internal/maze"
@@ -102,11 +103,15 @@ func (sm *SmartMover) Rotate() {
 }
 
 func (sm *SmartMover) Forward(cells int) {
-
+	if sm.state == stateDefault {
+		sm.move("forward", sm.getCalibrated(sm.config.robot.CellSize, sm.config.calibration.ForwardRatio))
+	}
 }
 
 func (sm *SmartMover) Backward(cells int) {
-
+	if sm.state == stateDefault {
+		sm.move("backward", sm.getCalibrated(sm.config.robot.CellSize, sm.config.calibration.BackwardRatio))
+	}
 }
 
 func (sm *SmartMover) CellState(d maze.Direction) Cell {
@@ -114,4 +119,8 @@ func (sm *SmartMover) CellState(d maze.Direction) Cell {
 	cell := resp.ToCell(d)
 	sm.logger.Infof("wall: %s, dir: %s", cell, d)
 	return cell
+}
+
+func (sm *SmartMover) getCalibrated(value int, calibration float32) int {
+	return int(math.Round(float64(value) * float64(calibration)))
 }

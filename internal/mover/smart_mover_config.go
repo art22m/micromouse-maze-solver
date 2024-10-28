@@ -59,11 +59,15 @@ type RobotConfig struct {
 	MovementDelay time.Duration `json:"movement_delay"`
 
 	// robot parameters
-	Width          int `json:"width"`
-	Length         int `json:"length"`
-	FrontLaserZero int `json:"front_laser_zero"`
-	BackLaserZero  int `json:"back_laser_zero"`
-	SideLasersZero int `json:"side_lasers_zero"`
+	Width                 int `json:"width"`
+	Length                int `json:"length"`
+	FrontLaserZero        int `json:"front_laser_zero"`
+	BackLaserZero         int `json:"back_laser_zero"`
+	SideLasersZero        int `json:"side_lasers_zero"`
+	MaxDerivationFromAxis int `json:"max_derivation_from_axis"`
+
+	// map parameters
+	CellSize int `json:"cell_size"`
 }
 
 type SmartMoverCalibrationConfig struct {
