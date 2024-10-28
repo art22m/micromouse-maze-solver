@@ -46,6 +46,10 @@ func (p Position) Shift(dir maze.Direction) Position {
 	return p
 }
 
+func (p Position) Equal(other Position) bool {
+	return p.x == other.x && p.y == other.y
+}
+
 func (p Position) String() string {
 	return fmt.Sprintf("(%v, %v)", p.x, p.y)
 }

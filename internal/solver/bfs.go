@@ -25,14 +25,14 @@ func (f *FloodFill) shortestPath() (path []Position) {
 
 	var finish *Position
 	for !q.Empty() {
-		frontPos := q.Pop()
-		nb := f.getVisitedOpenNeighbours(frontPos)
+		curr := q.Pop()
+		nb := f.getVisitedOpenNeighbours(curr)
 		for _, n := range nb {
 			if dist[n.x][n.y] != math.MaxInt {
 				continue
 			}
-			dist[n.x][n.y] = dist[frontPos.x][frontPos.y] + 1
-			parent[n] = &frontPos
+			dist[n.x][n.y] = dist[curr.x][curr.y] + 1
+			parent[n] = &curr
 			q.Push(n)
 			if finish == nil && f.isFinish(n) {
 				finish = &n

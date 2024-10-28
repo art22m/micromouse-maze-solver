@@ -56,6 +56,21 @@ func (f *FloodFill) getNeighbours(pos Position) (res []Position) {
 	return res
 }
 
+func (f *FloodFill) calculateDirection(pos Position) func() PositionWithDirection {
+	switch {
+	case f.pos.Shift(ma.Down).Equal(pos):
+		return func() PositionWithDirection { return PositionWithDirection{pos, ma.Down} }
+	case f.pos.Shift(ma.Up).Equal(pos):
+		return func() PositionWithDirection { return PositionWithDirection{pos, ma.Up} }
+	case f.pos.Shift(ma.Left).Equal(pos):
+		return func() PositionWithDirection { return PositionWithDirection{pos, ma.Left} }
+	case f.pos.Shift(ma.Right).Equal(pos):
+		return func() PositionWithDirection { return PositionWithDirection{pos, ma.Right} }
+	default:
+		panic("diagonal")
+	}
+}
+
 func (f *FloodFill) getOpenNeighbourWithSmallestFlood(pos Position) Position {
 	ns := f.getOpenNeighbours(pos)
 	if len(ns) == 0 {

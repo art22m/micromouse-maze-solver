@@ -75,22 +75,31 @@ func (f *FloodFill) FastPath(visited [][]bool, cells [][]ma.Wall) {
 	f.finishTo = Position{finishXTo, finishYTo}
 
 	path := f.shortestPath()
-	fmt.Println("shortest path:")
+	fmt.Println("found shortest path:")
 	for _, p := range path {
 		fmt.Println(p.String())
 	}
 	fmt.Println("--------------")
 
+	if !f.pos.Equal(path[0]) {
+		panic("should be equal to current position")
+	}
+
+	time.Sleep(5 * time.Second)
+
+	for i := 1; i < len(path); i++ {
+		log.Printf("-------------\nfast path iteration #%d", i)
+		if f.isFinish(f.pos) {
+			break
+		}
+		f.move(f.calculateDirection(path[i]))
+	}
+	log.Println("done")
 }
 
 func (f *FloodFill) ScanMaze() ([][]bool, [][]ma.Wall) {
-	f.printFlood()
-	f.printWalls()
-
 	f.startToFinish()
-	time.Sleep(100 * time.Millisecond)
 	f.finishToStart()
-
 	return f.visited, f.cells
 }
 
@@ -120,11 +129,11 @@ func (f *FloodFill) start() {
 
 		f.setVisited()
 		f.updateWalls()
-		if f.getFlood(f.pos) == 0 {
+		if f.isFinish(f.pos) {
 			break
 		}
 		f.smartFloodFill()
-		f.move()
+		f.move(f.getNextPosition)
 	}
 
 	log.Println("finish was reached")
@@ -132,8 +141,8 @@ func (f *FloodFill) start() {
 	f.printWalls()
 }
 
-func (f *FloodFill) move() {
-	nextPos := f.getNextPosition()
+func (f *FloodFill) move(getNextPosition func() PositionWithDirection) {
+	nextPos := getNextPosition()
 	log.Printf("want to go to %v\n", nextPos.String())
 
 	newDir, moveForward := f.rotateIfNeeded(nextPos)
