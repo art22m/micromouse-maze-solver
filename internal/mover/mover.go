@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
@@ -148,6 +149,8 @@ func (m *baseMover) move(direction string, value int) (*http.Response, error) {
 	return resp, err
 }
 
+const sensorValueRetryThreshold = 25000.0
+
 func (m *baseMover) getSensor() (*CellResp, error) {
 	/* sensors POST:
 	http://[robot_ip]/sensor
@@ -189,6 +192,17 @@ func (m *baseMover) getSensor() (*CellResp, error) {
 	err = json.Unmarshal(body, &cellResp)
 	if err != nil {
 		return nil, err
+	}
+
+	l := cellResp.Laser
+	for _, v := range []float64{
+		l.Left, l.Right, l.Front, l.Back, l.Left45, l.Right45,
+	} {
+		if v > sensorValueRetryThreshold {
+			m.logger.Error("values is more then sensorValueRetryThreshold")
+			time.Sleep(20 * time.Millisecond)
+			return m.getSensor()
+		}
 	}
 	return &cellResp, err
 }
