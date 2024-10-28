@@ -9,9 +9,9 @@ type Direction int
 
 const (
 	Left  Direction = 1 << 0
-	Up              = 1 << 1
-	Right           = 1 << 2
-	Down            = 1 << 3
+	Up    Direction = 1 << 1
+	Right Direction = 1 << 2
+	Down  Direction = 1 << 3
 )
 
 func (d Direction) TurnsCount(dc Direction) int {
@@ -175,6 +175,13 @@ func (d Direction) LocalTo(orientation Direction) Direction {
 }
 
 func (d Direction) GlobalFrom(orientation Direction) Direction {
+	if orientation == Up {
+		return d
+	}
+	if d == Up {
+		return orientation
+	}
+
 	if d == orientation || d.Opposite() == orientation {
 		return d.LocalTo(orientation).Opposite()
 	}

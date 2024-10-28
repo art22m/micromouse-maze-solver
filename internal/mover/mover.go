@@ -50,52 +50,16 @@ const wallThreshold float64 = 140
 func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 	var w maze.Wall
 	if c.Laser.Back < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.D)
-		case maze.Right:
-			w.Add(maze.L)
-		case maze.Down:
-			w.Add(maze.U)
-		case maze.Left:
-			w.Add(maze.R)
-		}
+		w.Add(maze.Wall(maze.Down.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Front < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.U)
-		case maze.Right:
-			w.Add(maze.R)
-		case maze.Down:
-			w.Add(maze.D)
-		case maze.Left:
-			w.Add(maze.L)
-		}
+		w.Add(maze.Wall(maze.Up.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Left < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.L)
-		case maze.Right:
-			w.Add(maze.U)
-		case maze.Down:
-			w.Add(maze.R)
-		case maze.Left:
-			w.Add(maze.D)
-		}
+		w.Add(maze.Wall(maze.Left.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Right < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.R)
-		case maze.Right:
-			w.Add(maze.D)
-		case maze.Down:
-			w.Add(maze.L)
-		case maze.Left:
-			w.Add(maze.U)
-		}
+		w.Add(maze.Wall(maze.Right.GlobalFrom(robotDir)))
 	}
 	return Cell{
 		Wall: w,
