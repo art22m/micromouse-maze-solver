@@ -73,7 +73,7 @@ func (m *SmartMover) fixCenter() int {
 }
 
 func (m *SmartMover) fixAngle() int {
-	diff := m.angle - m.targetAimAngle
+	diff := (m.angle+360-m.startAngle)%360 - m.targetAimAngle
 	if diff > 180 {
 		diff -= 360
 	} else if diff < -180 {
