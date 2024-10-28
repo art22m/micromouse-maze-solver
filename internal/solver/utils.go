@@ -1,6 +1,8 @@
 package solver
 
 import (
+	"fmt"
+	"log"
 	"sort"
 
 	ma "jackson/internal/maze"
@@ -93,4 +95,64 @@ func (f *FloodFill) isOpen(from Position, to Position) bool {
 	default:
 		panic("wtf??")
 	}
+}
+
+func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
+	if !f.validPosition(pos) {
+		return
+	}
+	f.cells[pos.x][pos.y] |= wall
+}
+
+func (f *FloodFill) updateNeighboursWallsIfNeeded(pos Position, wall ma.Wall) {
+	if wall.Contains(ma.L) {
+		f.updateWallsIfNeeded(pos.Shift(ma.Left), ma.R)
+	}
+	if wall.Contains(ma.U) {
+		f.updateWallsIfNeeded(pos.Shift(ma.Up), ma.D)
+	}
+	if wall.Contains(ma.R) {
+		f.updateWallsIfNeeded(pos.Shift(ma.Right), ma.L)
+	}
+	if wall.Contains(ma.D) {
+		f.updateWallsIfNeeded(pos.Shift(ma.Down), ma.U)
+	}
+}
+
+func (f *FloodFill) setFlood(pos Position, val int) {
+	f.flood[pos.x][pos.y] = val
+}
+
+func (f *FloodFill) getFlood(pos Position) int {
+	return f.flood[pos.x][pos.y]
+}
+
+func (f *FloodFill) getCell(pos Position) ma.Wall {
+	return f.cells[pos.x][pos.y]
+}
+
+func (f *FloodFill) setVisited() {
+	f.visited[f.pos.x][f.pos.y] = true
+}
+
+func (f *FloodFill) printFlood() {
+	log.Println("----flood-----")
+	for i := height - 1; i >= 0; i-- {
+		for j := 0; j < width; j++ {
+			fmt.Printf("%-4v", f.flood[i][j])
+		}
+		fmt.Println()
+	}
+	log.Println("-------------")
+}
+
+func (f *FloodFill) printWalls() {
+	log.Println("----walls-----")
+	for i := height - 1; i >= 0; i-- {
+		for j := 0; j < width; j++ {
+			fmt.Printf("%-4v", f.cells[i][j])
+		}
+		fmt.Println()
+	}
+	log.Println("-------------")
 }

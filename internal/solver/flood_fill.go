@@ -22,10 +22,9 @@ type FloodFillConfig struct {
 }
 
 type FloodFill struct {
-	flood       [][]int
-	cachedFlood [][]int
-	visited     [][]bool
-	cells       [][]ma.Wall
+	flood   [][]int
+	visited [][]bool
+	cells   [][]ma.Wall
 
 	moveForwardOnly bool
 
@@ -53,10 +52,9 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 	}
 
 	ff := &FloodFill{
-		flood:       flood,
-		cachedFlood: nil,
-		cells:       cells,
-		visited:     visited,
+		flood:   flood,
+		cells:   cells,
+		visited: visited,
 
 		mo:              config.Mover,
 		pos:             config.StartPosition,
@@ -70,7 +68,22 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 	return ff
 }
 
-func (f *FloodFill) Solve() ([][]bool, [][]ma.Wall) {
+func (f *FloodFill) FastPath(visited [][]bool, cells [][]ma.Wall) {
+	f.visited = visited
+	f.cells = cells
+	f.finishFrom = Position{finishXFrom, finishYFrom}
+	f.finishTo = Position{finishXTo, finishYTo}
+
+	path := f.shortestPath()
+	fmt.Println("shortest path:")
+	for _, p := range path {
+		fmt.Println(p.String())
+	}
+	fmt.Println("--------------")
+
+}
+
+func (f *FloodFill) ScanMaze() ([][]bool, [][]ma.Wall) {
 	f.printFlood()
 	f.printWalls()
 
@@ -89,12 +102,10 @@ func (f *FloodFill) startToFinish() {
 func (f *FloodFill) finishToStart() {
 	log.Println("finding path from finish to start")
 
-	f.cachedFlood = f.flood
 	f.flood = make([][]int, height)
 	for i := 0; i < height; i++ {
 		f.flood[i] = make([]int, width)
 	}
-
 	f.finishFrom = Position{0, 0}
 	f.finishTo = Position{0, 0}
 
@@ -105,19 +116,17 @@ func (f *FloodFill) finishToStart() {
 func (f *FloodFill) start() {
 	for {
 		f.iteration++
-		log.Println("-------------")
-		log.Printf("iteration #%d", f.iteration)
+		log.Printf("-------------\niteration #%d", f.iteration)
 
-		f.visited[f.pos.x][f.pos.y] = true
+		f.setVisited()
+		f.updateWalls()
 		if f.getFlood(f.pos) == 0 {
-			f.updateWalls()
 			break
 		}
-
-		f.updateWalls()
 		f.smartFloodFill()
 		f.move()
 	}
+
 	log.Println("finish was reached")
 	f.printFlood()
 	f.printWalls()
@@ -218,28 +227,6 @@ func (f *FloodFill) updateWalls() {
 	f.updateNeighboursWallsIfNeeded(f.pos, state.Wall)
 }
 
-func (f *FloodFill) updateWallsIfNeeded(pos Position, wall ma.Wall) {
-	if !f.validPosition(pos) {
-		return
-	}
-	f.cells[pos.x][pos.y] |= wall
-}
-
-func (f *FloodFill) updateNeighboursWallsIfNeeded(pos Position, wall ma.Wall) {
-	if wall.Contains(ma.L) {
-		f.updateWallsIfNeeded(pos.Shift(ma.Left), ma.R)
-	}
-	if wall.Contains(ma.U) {
-		f.updateWallsIfNeeded(pos.Shift(ma.Up), ma.D)
-	}
-	if wall.Contains(ma.R) {
-		f.updateWallsIfNeeded(pos.Shift(ma.Right), ma.L)
-	}
-	if wall.Contains(ma.D) {
-		f.updateWallsIfNeeded(pos.Shift(ma.Down), ma.U)
-	}
-}
-
 func (f *FloodFill) dummyFloodFill() {
 	visited := make(map[Position]struct{}, height*width)
 	q := queue.Queue[Position]{}
@@ -268,15 +255,11 @@ func (f *FloodFill) dummyFloodFill() {
 }
 
 func (f *FloodFill) smartFloodFill() {
-	f.printFlood()
 	st := stack.Stack[Position]{}
 	st.Push(f.pos)
 	for !st.Empty() {
 		topPos := st.Pop()
 		minPos := f.getOpenNeighbourWithSmallestFlood(topPos)
-
-		fmt.Println(topPos.String())
-		fmt.Println(minPos.String())
 
 		if f.getFlood(topPos)-1 == f.getFlood(minPos) {
 			continue
@@ -290,38 +273,4 @@ func (f *FloodFill) smartFloodFill() {
 			st.Push(n)
 		}
 	}
-}
-
-func (f *FloodFill) setFlood(pos Position, val int) {
-	f.flood[pos.x][pos.y] = val
-}
-
-func (f *FloodFill) getFlood(pos Position) int {
-	return f.flood[pos.x][pos.y]
-}
-
-func (f *FloodFill) getCell(pos Position) ma.Wall {
-	return f.cells[pos.x][pos.y]
-}
-
-func (f *FloodFill) printFlood() {
-	log.Println("----flood-----")
-	for i := height - 1; i >= 0; i-- {
-		for j := 0; j < width; j++ {
-			fmt.Printf("%-4v", f.flood[i][j])
-		}
-		fmt.Println()
-	}
-	log.Println("-------------")
-}
-
-func (f *FloodFill) printWalls() {
-	log.Println("----walls-----")
-	for i := height - 1; i >= 0; i-- {
-		for j := 0; j < width; j++ {
-			fmt.Printf("%-4v", f.cells[i][j])
-		}
-		fmt.Println()
-	}
-	log.Println("-------------")
 }

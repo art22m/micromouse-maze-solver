@@ -18,7 +18,6 @@ func (q *Queue[T]) Pop() T {
 	if len(q.values) == 0 {
 		panic("empty queue")
 	}
-
 	value := q.values[0]
 	q.values = q.values[1:]
 	return value
