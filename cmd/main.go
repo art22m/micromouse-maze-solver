@@ -18,11 +18,6 @@ var log = logrus.New()
 func init() {
 	log.SetLevel(logrus.DebugLevel)
 	log.SetFormatter(&logrus.JSONFormatter{})
-	file, err := os.OpenFile(time.Now().Format(time.RFC3339)+".log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Panic("failed to open log file")
-	}
-	log.SetOutput(file)
 }
 
 const (
@@ -34,12 +29,30 @@ const (
 func main() {
 	dummy := flag.Bool("dummy", false, "")
 	backward := flag.Bool("bw", false, "")
+	stdLogs := flag.Bool("std", false, "")
 	sip := flag.String("sip", sensorsIP, "")
 	mip := flag.String("bip", motorsIP, "")
 	id := flag.String("id", robotID, "")
 	flag.Parse()
 
-	fmt.Println("flags", *sip, *mip, *id, dummy, backward)
+	fmt.Printf(
+		"is_dummy=\t%v\n"+
+			"backward=\t%v\n"+
+			"logs_to_std=\t%v\n"+
+			"sensors_ip=\t%s\n"+
+			"motors_ip=\t%s\n"+
+			"robot_id=\t%s\n",
+		*dummy, *backward, *stdLogs, *sip, *mip, *id,
+	)
+	if *stdLogs {
+		log.SetOutput(os.Stdout)
+	} else {
+		file, err := os.OpenFile(time.Now().Format(time.RFC3339)+".log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Panic("failed to open log file")
+		}
+		log.SetOutput(file)
+	}
 
 	var mover mo.Mover
 	if *dummy {

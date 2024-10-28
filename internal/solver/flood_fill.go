@@ -159,7 +159,7 @@ func (f *FloodFill) finishToStart() {
 func (f *FloodFill) start() {
 	for {
 		f.iteration++
-		f.logger.Warnf("-------------\niteration #%d", f.iteration)
+		f.logger.Warnf("!!! iteration #%d", f.iteration)
 
 		f.setVisited()
 		f.updateWalls()
