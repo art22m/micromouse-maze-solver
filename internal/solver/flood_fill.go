@@ -1,10 +1,11 @@
 package solver
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"sort"
-	"time"
 
 	ma "jackson/internal/maze"
 	mo "jackson/internal/mover"
@@ -68,11 +69,20 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 	return ff
 }
 
-func (f *FloodFill) FastPath(visited [][]bool, cells [][]ma.Wall) {
+func (f *FloodFill) RunFastPath(
+	visited [][]bool,
+	cells [][]ma.Wall,
+	pos Position,
+	dir ma.Direction,
+) {
+	log.Println("start fast path")
+
 	f.visited = visited
 	f.cells = cells
 	f.finishFrom = Position{finishXFrom, finishYFrom}
 	f.finishTo = Position{finishXTo, finishYTo}
+	f.pos = pos
+	f.dir = dir
 
 	path := f.shortestPath()
 	fmt.Println("found shortest path:")
@@ -85,8 +95,6 @@ func (f *FloodFill) FastPath(visited [][]bool, cells [][]ma.Wall) {
 		panic("should be equal to current position")
 	}
 
-	time.Sleep(5 * time.Second)
-
 	for i := 1; i < len(path); i++ {
 		log.Printf("-------------\nfast path iteration #%d", i)
 		if f.isFinish(f.pos) {
@@ -97,10 +105,29 @@ func (f *FloodFill) FastPath(visited [][]bool, cells [][]ma.Wall) {
 	log.Println("done")
 }
 
-func (f *FloodFill) ScanMaze() ([][]bool, [][]ma.Wall) {
+func (f *FloodFill) Solve() {
 	f.startToFinish()
-	f.finishToStart()
-	return f.visited, f.cells
+
+	fmt.Println("\n" +
+		"(1)          Continue flood-fill, current position won't be changed \n" +
+		"(2)(default) Go from start to finish, current position would be (0,0) and up direction",
+	)
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	if scanner.Err() != nil {
+		fmt.Println("!!!! scan error", scanner.Err())
+	}
+
+	switch scanner.Text() {
+	case "1":
+		f.finishToStart()
+		f.RunFastPath(f.visited, f.cells, f.pos, f.dir)
+	default:
+		f.RunFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
+	}
+
+	return
 }
 
 func (f *FloodFill) startToFinish() {

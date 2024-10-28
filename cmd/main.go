@@ -39,6 +39,5 @@ func main() {
 	}
 
 	ff := solver.NewFloodFill(config)
-	visited, walls := ff.ScanMaze()
-	ff.FastPath(visited, walls)
+	ff.Solve()
 }
