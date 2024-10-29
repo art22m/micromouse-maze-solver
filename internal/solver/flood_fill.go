@@ -108,6 +108,13 @@ func (f *FloodFill) runFastPath(
 }
 
 func (f *FloodFill) Solve() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("panic recovered:", err)
+			f.AskUser()
+		}
+	}()
+
 	f.AskUser()
 }
 
