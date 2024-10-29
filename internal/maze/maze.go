@@ -109,6 +109,24 @@ func (w Wall) String() string {
 	return sb.String()
 }
 
+func (w Wall) LocalTo(d Direction) Wall {
+	res := Wall(Empty)
+	if w.Contains(U) {
+		res.Add(Wall(Up.LocalTo(d)))
+	}
+	if w.Contains(R) {
+		res.Add(Wall(Right.LocalTo(d)))
+	}
+	if w.Contains(D) {
+		res.Add(Wall(Down.LocalTo(d)))
+	}
+	if w.Contains(L) {
+		res.Add(Wall(Left.LocalTo(d)))
+	}
+
+	return res
+}
+
 func abs(v int) int {
 	if v > 0 {
 		return v
