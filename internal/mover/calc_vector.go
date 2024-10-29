@@ -29,10 +29,10 @@ func calcVector(walls maze.Wall, state *CellResp, targetX int, targetY int) (rot
 
 	/*
 		                           | /
-		if angle righter then axis |/  then sideFromAxis = 1
+		if angle righter than axis |/  then sideFromAxis = 1
 
 								 \ |
-		if angle lefter then axis \| then sideFromAxis = -1
+		if angle lefter than axis \| then sideFromAxis = -1
 	*/
 	sideFromAxis := 1.0
 	if angle > 45 {
