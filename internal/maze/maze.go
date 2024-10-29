@@ -1,24 +1,42 @@
 package maze
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Direction int
 
 const (
-	Up Direction = iota + 1
-	Right
-	Down
-	Left
+	Left  Direction = 1 << 0
+	Up    Direction = 1 << 1
+	Right Direction = 1 << 2
+	Down  Direction = 1 << 3
 )
 
 func (d Direction) TurnsCount(dc Direction) int {
 	if d == dc {
 		return 0
 	}
-	if abs(int(d-dc)) == 1 || abs(int(d-dc)) == 3 {
-		return 1
+
+	switch d {
+	case Left, Right:
+		switch dc {
+		case Up, Down:
+			return 1
+		default:
+			return 2
+		}
+	case Up, Down:
+		switch dc {
+		case Left, Right:
+			return 1
+		default:
+			return 2
+		}
 	}
-	return 2
+
+	panic("invalid directions")
 }
 
 func (d Direction) String() string {
@@ -96,4 +114,77 @@ func abs(v int) int {
 		return v
 	}
 	return -v
+}
+
+func (d Direction) Opposite() Direction {
+	switch d {
+	case Up:
+		return Down
+	case Down:
+		return Up
+	case Left:
+		return Right
+	case Right:
+		return Left
+	}
+
+	panic(fmt.Errorf("Direction.Opposite: invalid d (%d)", d))
+}
+
+func (d Direction) LocalTo(orientation Direction) Direction {
+	if orientation == Up {
+		return d
+	}
+
+	if d == orientation {
+		return Up
+	}
+
+	if d.Opposite() == orientation {
+		return Down
+	}
+
+	if orientation == Right {
+		switch d {
+		case Up:
+			return Left
+		case Down:
+			return Right
+		}
+	}
+
+	if orientation == Left {
+		switch d {
+		case Up:
+			return Right
+		case Down:
+			return Left
+		}
+	}
+
+	if orientation == Down {
+		switch d {
+		case Left:
+			return Right
+		case Right:
+			return Left
+		}
+	}
+
+	panic(fmt.Errorf("LocalTo: invalid combination of d (%d) and orientation (%d)", d, orientation))
+}
+
+func (d Direction) GlobalFrom(orientation Direction) Direction {
+	if orientation == Up {
+		return d
+	}
+	if d == Up {
+		return orientation
+	}
+
+	if d == orientation || d.Opposite() == orientation {
+		return d.LocalTo(orientation).Opposite()
+	}
+
+	return d.LocalTo(orientation)
 }

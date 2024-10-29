@@ -2,7 +2,6 @@ package solver
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	ma "jackson/internal/maze"
@@ -151,29 +150,29 @@ func (f *FloodFill) setVisited() {
 }
 
 func (f *FloodFill) printFlood() {
-	log.Println("----flood-----")
+	fmt.Println("----flood-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
 			fmt.Printf("%-4v", f.flood[i][j])
 		}
 		fmt.Println()
 	}
-	log.Println("-------------")
+	fmt.Println("-------------")
 }
 
 func (f *FloodFill) printWalls() {
-	log.Println("----walls-----")
+	fmt.Println("----walls-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
 			fmt.Printf("%-4v", f.cells[i][j])
 		}
 		fmt.Println()
 	}
-	log.Println("-------------")
+	fmt.Println("-------------")
 }
 
 func (f *FloodFill) printVisited() {
-	log.Println("----visited-----")
+	fmt.Println("----visited-----")
 	for i := height - 1; i >= 0; i-- {
 		for j := 0; j < width; j++ {
 			if f.visited[i][j] {
@@ -184,5 +183,5 @@ func (f *FloodFill) printVisited() {
 		}
 		fmt.Println()
 	}
-	log.Println("-------------")
+	fmt.Println("-------------")
 }

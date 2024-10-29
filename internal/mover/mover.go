@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/sirupsen/logrus"
 
 	"jackson/internal/maze"
 )
@@ -47,56 +50,17 @@ const wallThreshold float64 = 140
 func (c CellResp) ToCell(robotDir maze.Direction) Cell {
 	var w maze.Wall
 	if c.Laser.Back < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.D)
-		case maze.Right:
-			w.Add(maze.L)
-		case maze.Down:
-			w.Add(maze.U)
-		case maze.Left:
-			w.Add(maze.R)
-		}
+		w.Add(maze.Wall(maze.Down.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Front < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.U)
-		case maze.Right:
-			w.Add(maze.R)
-		case maze.Down:
-			w.Add(maze.D)
-		case maze.Left:
-			w.Add(maze.L)
-		}
+		w.Add(maze.Wall(maze.Up.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Left < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.L)
-		case maze.Right:
-			w.Add(maze.U)
-		case maze.Down:
-			w.Add(maze.R)
-		case maze.Left:
-			w.Add(maze.D)
-		}
+		w.Add(maze.Wall(maze.Left.GlobalFrom(robotDir)))
 	}
 	if c.Laser.Right < wallThreshold {
-		switch robotDir {
-		case maze.Up:
-			w.Add(maze.R)
-		case maze.Right:
-			w.Add(maze.D)
-		case maze.Down:
-			w.Add(maze.L)
-		case maze.Left:
-			w.Add(maze.U)
-		}
+		w.Add(maze.Wall(maze.Right.GlobalFrom(robotDir)))
 	}
-
-	log.Printf("wall: %s, dir: %s", w, robotDir)
-
 	return Cell{
 		Wall: w,
 	}
@@ -106,15 +70,17 @@ type baseMover struct {
 	motorsIP  string
 	sensorsIP string
 	id        string
+
+	logger *logrus.Entry
 }
 
-func (m baseMover) move(direction string, value int) (*http.Response, error) {
+func (m *baseMover) move(direction string, value int) {
 	/* move PUT:
 	http://[robot_ip]/move
 	{"id": "123456", "direction":"forward", "len": 100}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.motorsIP, "move")
-	log.Printf("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
+	m.logger.Infof("send /move to %s, dir=%s, val=%v\n", reqUrl, direction, value)
 
 	reqBody, err := json.Marshal(struct {
 		Id        string `json:"id"`
@@ -126,65 +92,80 @@ func (m baseMover) move(direction string, value int) (*http.Response, error) {
 		Len:       value,
 	})
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := http.NewRequest(http.MethodPut, reqUrl, requestBody)
+	req, err := retryablehttp.NewRequest(http.MethodPut, reqUrl, requestBody)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	resp, err := http.DefaultClient.Do(req)
+	client := retryablehttp.NewClient()
+	client.Logger = m.logger
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
-	log.Println("get /move", resp.Body)
-	return resp, err
+	m.logger.Info("get /move", resp.Body)
 }
 
-func (m baseMover) getSensor() (*CellResp, error) {
+const sensorValueRetryThreshold = 25000.0
+
+func (m *baseMover) getSensor() *CellResp {
 	/* sensors POST:
 	http://[robot_ip]/sensor
 	{"id": "123456", "type": "all"}
 	*/
 	reqUrl := fmt.Sprintf("http://%s/%s", m.sensorsIP, "sensor")
-	log.Printf("send /sensor to %s\n", reqUrl)
+	m.logger.Infof("send /sensor to %s\n", reqUrl)
 
 	reqBody, err := json.Marshal(map[string]string{
 		"id":   m.id,
 		"type": "all",
 	})
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := http.NewRequest(http.MethodPost, reqUrl, requestBody)
+	req, err := retryablehttp.NewRequest(http.MethodPost, reqUrl, requestBody)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	resp, err := http.DefaultClient.Do(req)
+	client := retryablehttp.NewClient()
+	client.Logger = m.logger
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
-	log.Println("get /sensor", string(body))
+	m.logger.Info("get /sensor", string(body))
 
-	// Unmarshal the JSON response into the struct
 	var cellResp CellResp
 	err = json.Unmarshal(body, &cellResp)
 	if err != nil {
-		return nil, err
+		m.logger.Fatal(err)
 	}
-	return &cellResp, err
+
+	l := cellResp.Laser
+	for _, v := range []float64{
+		l.Left, l.Right, l.Front, l.Back, l.Left45, l.Right45,
+	} {
+		if v > sensorValueRetryThreshold {
+			m.logger.Error("values is more then sensorValueRetryThreshold")
+			time.Sleep(50 * time.Millisecond)
+			return m.getSensor()
+		}
+	}
+	return &cellResp
 }

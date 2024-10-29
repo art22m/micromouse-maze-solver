@@ -3,9 +3,10 @@ package solver
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"sort"
+
+	"github.com/sirupsen/logrus"
 
 	ma "jackson/internal/maze"
 	mo "jackson/internal/mover"
@@ -20,6 +21,8 @@ type FloodFillConfig struct {
 	MoveForwardOnly bool
 
 	Mover mo.Mover
+
+	Logger *logrus.Entry
 }
 
 type FloodFill struct {
@@ -38,11 +41,11 @@ type FloodFill struct {
 	mo mo.Mover
 
 	iteration int
+
+	logger *logrus.Entry
 }
 
 func NewFloodFill(config FloodFillConfig) *FloodFill {
-	log.SetPrefix("flood-fill: ")
-
 	flood := make([][]int, height)
 	cells := make([][]ma.Wall, height)
 	visited := make([][]bool, height)
@@ -64,6 +67,8 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 
 		finishFrom: Position{finishXFrom, finishYFrom},
 		finishTo:   Position{finishXTo, finishYTo},
+
+		logger: config.Logger,
 	}
 	ff.dummyFloodFill()
 	return ff
@@ -75,7 +80,7 @@ func (f *FloodFill) RunFastPath(
 	pos Position,
 	dir ma.Direction,
 ) {
-	log.Println("start fast path")
+	f.logger.Println("start fast path")
 
 	f.visited = visited
 	f.cells = cells
@@ -85,32 +90,38 @@ func (f *FloodFill) RunFastPath(
 	f.dir = dir
 
 	path := f.shortestPath()
-	fmt.Println("found shortest path:")
+	fmt.Println("shortest path:")
 	for _, p := range path {
-		fmt.Println(p.String())
+		fmt.Print(p.String(), "->")
 	}
-	fmt.Println("--------------")
+	fmt.Println("\n--------------")
 
 	if !f.pos.Equal(path[0]) {
 		panic("should be equal to current position")
 	}
 
 	for i := 1; i < len(path); i++ {
-		log.Printf("-------------\nfast path iteration #%d", i)
+		f.logger.Printf("-------------\nfast path iteration #%d", i)
 		if f.isFinish(f.pos) {
 			break
 		}
 		f.move(f.calculateDirection(path[i]))
 	}
-	log.Println("done")
+	f.askUser()
 }
 
 func (f *FloodFill) Solve() {
-	f.startToFinish()
+	fmt.Println("started...")
 
+	f.startToFinish()
+	f.askUser()
+}
+
+func (f *FloodFill) askUser() {
 	fmt.Println("\n" +
-		"(1)          Continue flood-fill, current position won't be changed \n" +
-		"(2)(default) Go from start to finish, current position would be (0,0) and up direction",
+		"(1) \t Continue flood-fill, current position won't be changed \n" +
+		"(2)(default) \t Go from start to finish, current position would be (0,0) and up direction\n" +
+		"(3) \t Exit",
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -123,20 +134,22 @@ func (f *FloodFill) Solve() {
 	case "1":
 		f.finishToStart()
 		f.RunFastPath(f.visited, f.cells, f.pos, f.dir)
+		return
+	case "3":
+		return
 	default:
 		f.RunFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
+		return
 	}
-
-	return
 }
 
 func (f *FloodFill) startToFinish() {
-	log.Println("finding path from start to finish")
+	f.logger.Info("finding path from start to finish")
 	f.start()
 }
 
 func (f *FloodFill) finishToStart() {
-	log.Println("finding path from finish to start")
+	f.logger.Info("finding path from finish to start")
 
 	f.flood = make([][]int, height)
 	for i := 0; i < height; i++ {
@@ -152,7 +165,7 @@ func (f *FloodFill) finishToStart() {
 func (f *FloodFill) start() {
 	for {
 		f.iteration++
-		log.Printf("-------------\niteration #%d", f.iteration)
+		f.logger.Warnf("!!! iteration #%d", f.iteration)
 
 		f.setVisited()
 		f.updateWalls()
@@ -163,17 +176,17 @@ func (f *FloodFill) start() {
 		f.move(f.getNextPosition)
 	}
 
-	log.Println("finish was reached")
+	f.logger.Info("finish was reached")
 	f.printFlood()
 	f.printWalls()
 }
 
 func (f *FloodFill) move(getNextPosition func() PositionWithDirection) {
 	nextPos := getNextPosition()
-	log.Printf("want to go to %v\n", nextPos.String())
+	f.logger.Infof("want to go to %v\n", nextPos.String())
 
 	newDir, moveForward := f.rotateIfNeeded(nextPos)
-	log.Printf("prev dir=%v, new dir=%v\n", f.dir.String(), newDir.String())
+	f.logger.Infof("prev dir=%v, new dir=%v\n", f.dir.String(), newDir.String())
 
 	if moveForward {
 		f.mo.Forward(1)
@@ -181,7 +194,7 @@ func (f *FloodFill) move(getNextPosition func() PositionWithDirection) {
 		f.mo.Backward(1)
 	}
 
-	log.Printf("prev pos=%v, new pos=%v\n", f.pos.String(), nextPos.Position.String())
+	f.logger.Infof("prev pos=%v, new pos=%v\n", f.pos.String(), nextPos.Position.String())
 
 	f.dir = newDir
 	f.pos = nextPos.Position
@@ -197,7 +210,6 @@ func (f *FloodFill) rotateIfNeeded(nextPos PositionWithDirection) (ma.Direction,
 			return nextPos.Direction, true
 		}
 		return f.dir, false
-
 	default:
 		switch f.dir {
 		case ma.Left:
@@ -257,8 +269,7 @@ func (f *FloodFill) getNextPosition() PositionWithDirection {
 
 func (f *FloodFill) updateWalls() {
 	state := f.mo.CellState(f.dir)
-	log.Printf("got state: wall=%v\n", state.Wall.String())
-
+	f.logger.Infof("got state: wall=%v\n", state.Wall.String())
 	f.updateWallsIfNeeded(f.pos, state.Wall)
 	f.updateNeighboursWallsIfNeeded(f.pos, state.Wall)
 }
