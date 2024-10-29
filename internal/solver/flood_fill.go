@@ -107,17 +107,21 @@ func (f *FloodFill) RunFastPath(
 		}
 		f.move(f.calculateDirection(path[i]))
 	}
-	f.logger.Info("done")
+	f.askUser()
 }
 
 func (f *FloodFill) Solve() {
 	fmt.Println("started...")
 
 	f.startToFinish()
+	f.askUser()
+}
 
+func (f *FloodFill) askUser() {
 	fmt.Println("\n" +
-		"(1)          Continue flood-fill, current position won't be changed \n" +
-		"(2)(default) Go from start to finish, current position would be (0,0) and up direction",
+		"(1) \t Continue flood-fill, current position won't be changed \n" +
+		"(2)(default) \t Go from start to finish, current position would be (0,0) and up direction\n" +
+		"(3) \t Exit",
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -130,11 +134,13 @@ func (f *FloodFill) Solve() {
 	case "1":
 		f.finishToStart()
 		f.RunFastPath(f.visited, f.cells, f.pos, f.dir)
+		return
+	case "3":
+		return
 	default:
 		f.RunFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
+		return
 	}
-
-	return
 }
 
 func (f *FloodFill) startToFinish() {
