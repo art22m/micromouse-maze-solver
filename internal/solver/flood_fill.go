@@ -55,7 +55,7 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 		visited[i] = make([]bool, width)
 	}
 
-	ff := &FloodFill{
+	return &FloodFill{
 		flood:   flood,
 		cells:   cells,
 		visited: visited,
@@ -70,11 +70,9 @@ func NewFloodFill(config FloodFillConfig) *FloodFill {
 
 		logger: config.Logger,
 	}
-	ff.dummyFloodFill()
-	return ff
 }
 
-func (f *FloodFill) RunFastPath(
+func (f *FloodFill) runFastPath(
 	visited [][]bool,
 	cells [][]ma.Wall,
 	pos Position,
@@ -107,21 +105,19 @@ func (f *FloodFill) RunFastPath(
 		}
 		f.move(f.calculateDirection(path[i]))
 	}
-	f.askUser()
 }
 
 func (f *FloodFill) Solve() {
-	fmt.Println("started...")
-
-	f.startToFinish()
-	f.askUser()
+	f.AskUser()
 }
 
-func (f *FloodFill) askUser() {
+func (f *FloodFill) AskUser() {
 	fmt.Println("\n" +
-		"(1) \t Continue flood-fill, current position won't be changed \n" +
-		"(2)(default) \t Go from start to finish, current position would be (0,0) and up direction\n" +
-		"(3) \t Exit",
+		"(1) \t [Flood Fill] From start, current position won't be changed \n" +
+		"(2) \t [Flood Fill] From finish, current position won't be changed \n" +
+		"(3) \t [Fast Path] Go from start to finish, current position would be (0,0) and UP direction\n" +
+		"(4) \t [Fast Path] Go from start to finish, current position won't be changed\n" +
+		"(5) \t Exit",
 	)
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -132,19 +128,30 @@ func (f *FloodFill) askUser() {
 
 	switch scanner.Text() {
 	case "1":
+		f.startToFinish()
+	case "2":
 		f.finishToStart()
-		f.RunFastPath(f.visited, f.cells, f.pos, f.dir)
-		return
 	case "3":
+		f.runFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
+	case "4":
+		f.runFastPath(f.visited, f.cells, f.pos, f.dir)
+	case "5", "exit":
 		return
 	default:
-		f.RunFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
-		return
+		fmt.Println("Invalid choice")
 	}
+	f.AskUser()
 }
 
 func (f *FloodFill) startToFinish() {
 	f.logger.Info("finding path from start to finish")
+
+	f.flood = make([][]int, height)
+	for i := 0; i < height; i++ {
+		f.flood[i] = make([]int, width)
+	}
+
+	f.dummyFloodFill()
 	f.start()
 }
 
@@ -155,6 +162,7 @@ func (f *FloodFill) finishToStart() {
 	for i := 0; i < height; i++ {
 		f.flood[i] = make([]int, width)
 	}
+
 	f.finishFrom = Position{0, 0}
 	f.finishTo = Position{0, 0}
 
