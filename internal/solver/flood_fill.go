@@ -111,14 +111,14 @@ func (f *FloodFill) Solve() {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("panic recovered:", err)
-			f.AskUser()
+			f.askUser()
 		}
 	}()
 
-	f.AskUser()
+	f.askUser()
 }
 
-func (f *FloodFill) AskUser() {
+func (f *FloodFill) askUser() {
 	fmt.Println("\n" +
 		"(1) \t [Flood Fill] From start, current position won't be changed \n" +
 		"(2) \t [Flood Fill] From finish, current position won't be changed \n" +
@@ -147,7 +147,7 @@ func (f *FloodFill) AskUser() {
 	default:
 		fmt.Println("Invalid choice")
 	}
-	f.AskUser()
+	f.askUser()
 }
 
 func (f *FloodFill) startToFinish() {
