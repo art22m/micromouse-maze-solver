@@ -139,6 +139,7 @@ func (f *FloodFill) askUser() {
 	case "2":
 		f.finishToStart()
 	case "3":
+		f.mo.Reset()
 		f.runFastPath(f.visited, f.cells, Position{x: 0, y: 0}, ma.Up)
 	case "4":
 		f.runFastPath(f.visited, f.cells, f.pos, f.dir)

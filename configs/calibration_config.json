@@ -1,1 +1,1 @@
-{}
+{"forward_ratio":0.7,"backward_ratio":1,"turn_right_ratio":1,"turn_left_ratio":1,"turn_180_ratio":1, "min_turn":60}

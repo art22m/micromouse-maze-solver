@@ -3,7 +3,6 @@ package mover
 import (
 	"encoding/json"
 	"os"
-	"time"
 )
 
 const (
@@ -53,10 +52,24 @@ func loadCalibrationConfig() SmartMoverCalibrationConfig {
 	return config
 }
 
+func saveCalibrationConfig(config SmartMoverCalibrationConfig) {
+	configFile, err := os.OpenFile(calibrationConfigPath, os.O_WRONLY, 0x666)
+	defer configFile.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	encoder := json.NewEncoder(configFile)
+	err = encoder.Encode(config)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type RobotConfig struct {
 	// min delay between /move call and subsequent api calls
-	SensorsDelay  time.Duration `json:"sensors_delay"`
-	MovementDelay time.Duration `json:"movement_delay"`
+	SensorsDelayMs  int `json:"sensors_delay_ms"`
+	MovementDelayMs int `json:"movement_delay_ms"`
 
 	// robot parameters
 	Width                 int `json:"width"`
@@ -73,7 +86,7 @@ type RobotConfig struct {
 type SmartMoverCalibrationConfig struct {
 	ForwardRatio   float32 `json:"forward_ratio"`
 	BackwardRatio  float32 `json:"backward_ratio"`
-	TurnRightRatio float32 `json:"right_turn_ratio"`
+	TurnRightRatio float32 `json:"turn_right_ratio"`
 	TurnLeftRatio  float32 `json:"turn_left_ratio"`
 	Turn180Ratio   float32 `json:"turn_180_ratio"`
 	// can't turn less than this

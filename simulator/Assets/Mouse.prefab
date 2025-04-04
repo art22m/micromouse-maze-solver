@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 668848124568586010}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0.5, y: 0, z: 0}
+  m_LocalPosition: {x: -0.3409091, y: 0.21428572, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,11 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb820ac8610454a2fada6a3f808ec407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxReading: 500
+  maxReading: 191
   errorMean: 0
-  errorStd: 0.05
+  errorStd: 0
   absErrorMean: 0
-  absErrorStd: 5
+  absErrorStd: 10
   errorSeed: 31
   absErrorSeed: 32
 --- !u!1 &1210969045833421162
@@ -215,7 +215,7 @@ Transform:
   m_GameObject: {fileID: 2015378684913956693}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalPosition: {x: 0.3409091, y: 0.21428572, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -233,11 +233,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb820ac8610454a2fada6a3f808ec407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxReading: 500
+  maxReading: 191
   errorMean: 0
-  errorStd: 0.05
+  errorStd: 0
   absErrorMean: 0
-  absErrorStd: 5
+  absErrorStd: 10
   errorSeed: 21
   absErrorSeed: 22
 --- !u!1 &2733902228579288641
@@ -266,7 +266,7 @@ Transform:
   m_GameObject: {fileID: 2733902228579288641}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.2857143, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -286,9 +286,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxReading: 191
   errorMean: 0
-  errorStd: 0.05
+  errorStd: 0
   absErrorMean: 0
-  absErrorStd: 5
+  absErrorStd: 10
   errorSeed: 11
   absErrorSeed: 12
 --- !u!1 &3119762788654543930
@@ -455,7 +455,7 @@ Transform:
   m_GameObject: {fileID: 8284047211525252904}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalPosition: {x: 0, y: -0.2857143, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -473,11 +473,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb820ac8610454a2fada6a3f808ec407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxReading: 500
+  maxReading: 191
   errorMean: 0
-  errorStd: 0.05
+  errorStd: 0
   absErrorMean: 0
-  absErrorStd: 5
+  absErrorStd: 10
   errorSeed: 41
   absErrorSeed: 42
 --- !u!1 &9154829941279353625
@@ -607,25 +607,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a30e0b9065c456887280e9d0eb079e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExact: 1
-  forwardErrorMean: 0.03
-  forwardErrorStd: 0.02
-  forwardAbsErrorMean: 0
+  isExact: 0
+  forwardErrorMean: 0
+  forwardErrorStd: 0
+  forwardAbsErrorMean: 20
   forwardAbsErrorStd: 0
   backwardErrorMean: 0
-  backwardErrorStd: 0.02
+  backwardErrorStd: 0.1
   backwardAbsErrorMean: 0
   backwardAbsErrorStd: 0
-  rightErrorMean: 0
-  rightErrorStd: 0.02
-  rightAbsErrorMean: -7
+  rightErrorMean: 0.2
+  rightErrorStd: 0
+  rightAbsErrorMean: 0
   rightAbsErrorStd: 0
   leftErrorMean: 0
-  leftErrorStd: 0.02
-  leftAbsErrorMean: -5
+  leftErrorStd: 0
+  leftAbsErrorMean: 0
   leftAbsErrorStd: 0
-  yawAbsErrorStd: 1
-  northYawReading: 0
+  yawAbsErrorStd: 0
+  northYawReading: 40
   forwardErrorSeed: 1
   forwardAbsErrorSeed: 2
   backwardErrorSeed: 3

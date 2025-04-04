@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 
 	"jackson/internal/maze"
@@ -23,6 +22,8 @@ type Mover interface {
 	Rotate()
 
 	CellState(d maze.Direction) Cell
+
+	Reset()
 }
 
 type Cell struct {
@@ -97,15 +98,15 @@ func (m *baseMover) move(direction string, value int) {
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := retryablehttp.NewRequest(http.MethodPut, reqUrl, requestBody)
+	req, err := http.NewRequest(http.MethodPut, reqUrl, requestBody)
 	if err != nil {
 		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	client := retryablehttp.NewClient()
-	client.Logger = m.logger
-	resp, err := client.Do(req)
+	//client := retryablehttp.NewClient()
+	//client.Logger = m.logger
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		m.logger.Fatal(err)
 	}
@@ -132,15 +133,16 @@ func (m *baseMover) getSensor() *CellResp {
 
 	requestBody := bytes.NewBuffer(reqBody)
 
-	req, err := retryablehttp.NewRequest(http.MethodPost, reqUrl, requestBody)
+	req, err := http.NewRequest(http.MethodPost, reqUrl, requestBody)
 	if err != nil {
 		m.logger.Fatal(err)
 	}
 	req.Header.Add("Content-Type", `application/json`)
 
-	client := retryablehttp.NewClient()
-	client.Logger = m.logger
-	resp, err := client.Do(req)
+	//client := retryablehttp.NewClient()
+	//client.Logger = m.logger
+	//resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		m.logger.Fatal(err)
 	}

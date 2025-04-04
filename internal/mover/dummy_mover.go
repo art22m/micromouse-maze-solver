@@ -47,3 +47,7 @@ func (m *DummyMover) CellState(d maze.Direction) Cell {
 	m.logger.Infof("wall: %s, dir: %s", cell, d)
 	return cell
 }
+
+func (m *DummyMover) Reset() {
+
+}

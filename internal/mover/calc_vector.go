@@ -12,7 +12,8 @@ func fromDegToRad(angle float64) float64 {
 
 func calcVector(walls maze.Wall, state *CellResp, targetX int, targetY int) (rotate int, forward int) {
 	// cell size
-	cellSize := 168.0
+	wallSize := 168.0
+	cornerSize := 12.0
 
 	// sensor shift inside mouse
 	fromCenterToFrontSensor, fromCenterToBackSensor := 20.0, 20.0
@@ -41,26 +42,26 @@ func calcVector(walls maze.Wall, state *CellResp, targetX int, targetY int) (rot
 	}
 	angle = fromDegToRad(angle)
 
-	diagonalX, diagonalY := -1.0, -1.0
+	diagonalX, diagonalY := 90.0, 90.0
 
 	// xDiagonal calculation
 	if walls.Contains(maze.L) {
 		diagonalX =
 			(state.Laser.Left * math.Cos(angle)) -
 				sideFromAxis*((mouseLen/2)-fromFrontSideSensorsShift)*math.Sin(angle) +
-				(mouseWidth/2)/math.Cos(angle)
+				(mouseWidth/2)*math.Cos(angle) + cornerSize/2.0
 	} else if walls.Contains(maze.R) {
-		diagonalX = cellSize -
+		diagonalX = wallSize + cornerSize/2.0 -
 			((state.Laser.Right * math.Cos(angle)) +
 				sideFromAxis*((mouseLen/2)-fromFrontSideSensorsShift)*math.Sin(angle) +
-				(mouseWidth/2)/math.Cos(angle))
+				(mouseWidth/2)*math.Cos(angle))
 	}
 
 	// yDiagonal calculation
 	if walls.Contains(maze.D) {
-		diagonalY = (state.Laser.Back + mouseLen/2 - fromCenterToBackSensor) * math.Cos(angle)
+		diagonalY = (state.Laser.Back+fromCenterToBackSensor)*math.Cos(angle) + cornerSize/2.0
 	} else if walls.Contains(maze.U) {
-		diagonalY = cellSize - (state.Laser.Back+mouseLen/2-fromCenterToFrontSensor)*math.Cos(angle)
+		diagonalY = wallSize + cornerSize/2.0 - (state.Laser.Front+fromCenterToFrontSensor)*math.Cos(angle)
 	}
 
 	// calc distance as sqrt( (x_d - x_t)^2 + (y_d - y_t)^2 )
@@ -69,5 +70,12 @@ func calcVector(walls maze.Wall, state *CellResp, targetX int, targetY int) (rot
 	// angle
 	theta := math.Atan2(float64(targetY)-diagonalY, float64(targetX)-diagonalX)
 	phi := math.Pi/2.0 - theta - sideFromAxis*angle
-	return int(phi * (180.0 / math.Pi)), int(distance)
+	fixedPhi := int(phi * (180.0 / math.Pi))
+	if fixedPhi > 180 {
+		fixedPhi -= 360
+	}
+	if fixedPhi < -180 {
+		fixedPhi += 360
+	}
+	return fixedPhi, int(distance)
 }
